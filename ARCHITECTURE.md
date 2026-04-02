@@ -1,10 +1,11 @@
-# Hypricing — Project Architecture
+# Hypricing — Architecture
 
 ## Overview
 
-Hypricing is a GUI settings manager for Hyprland. It orchestrates existing Linux tools
-(hyprctl, wpctl, bluetoothctl, upower, powerprofilesctl) and manages Hyprland config files
-directly. It does not replace any tool — it is a thin, composable layer on top of them.
+Hypricing is a GUI settings manager for Hyprland. It provides a graphical interface over
+existing Linux tools (`hyprctl`, `wpctl`, `bluetoothctl`, `upower`, `powerprofilesctl`) and
+manages Hyprland configuration files directly. Hypricing does not replace any underlying tool —
+it is a composable orchestration layer.
 
 **Stack:** .NET 10 · Avalonia UI 11 · AOT · Linux x64
 
@@ -37,15 +38,17 @@ Hypricing/
 └─────────────────────────────────────┘
 ```
 
-Dependencies flow **downward only**. Desktop depends on Core. Core depends on Parser.
-Parser depends on nothing.
+Dependencies flow **downward only**. `Desktop` depends on `Core`. `Core` depends on
+`HyprlangParser`. `HyprlangParser` has no dependencies.
 
 ---
 
 ## 1. Hypricing.HyprlangParser
 
-**Role:** Parse a single Hyprlang file into an AST. Modify it. Write it back.
-**Constraints:** Pure library. No I/O. No file system access. No dependencies.
+**Role:** Parse a single Hyprlang file into an AST, allow in-memory modification, and
+serialize the AST back to text.
+
+**Constraints:** Pure library. No I/O. No file system access. No external dependencies.
 
 ### Structure
 
@@ -64,12 +67,12 @@ Hypricing.HyprlangParser/
 │   ├── SourceNode.cs         # source = path
 │   ├── CommentNode.cs        # # comment
 │   ├── EmptyLineNode.cs      # blank line
-│   └── RawNode.cs            # unrecognized → preserved verbatim
+│   └── RawNode.cs            # unrecognized content — preserved verbatim
 └── Exceptions/
     └── ParseException.cs
 ```
 
-### Contract
+### Public API
 
 ```csharp
 // Parse
@@ -82,18 +85,26 @@ config.Declarations["myvar"].Value = "newvalue";
 string result = HyprlangWriter.Write(config);
 ```
 
-### Key Rules
+### Invariants
 
-- Unknown content → `RawNode` (never lost, never modified)
-- Round-trip: `Write(Parse(text)) == text` for unmodified configs
-- No file I/O — caller provides the string, caller writes the file
+- Any content not recognized by the parser becomes a `RawNode` and is written back verbatim.
+  No data is ever lost.
+- Round-trip guarantee: `Write(Parse(text)) == text` for unmodified ASTs.
+- The library performs no file I/O. The caller is responsible for reading and writing files.
+
+### Implementation
+
+The parser is a hand-written **recursive descent parser** operating on `ReadOnlySpan<char>`
+to minimize heap allocations. See [Performance Notes](#performance-notes) for details.
 
 ---
 
 ## 2. Hypricing.Core
 
-**Role:** Business logic. Knows about Hyprland, the file system, and external tools.
-**Depends on:** `HyprlangParser`
+**Role:** Business logic layer. Manages the Hyprland configuration lifecycle and
+communicates with external system tools.
+
+**Depends on:** `Hypricing.HyprlangParser`
 
 ### Structure
 
@@ -107,7 +118,7 @@ Hypricing.Core/
 │   └── IdleService.cs            # manages hypridle.conf
 ├── Semantic/
 │   ├── OptionRegistry.cs         # known options catalog
-│   └── Definitions/              # option definitions per section
+│   └── Definitions/
 │       ├── GeneralOptions.cs
 │       ├── DecorationOptions.cs
 │       └── ...
@@ -122,21 +133,21 @@ Hypricing.Core/
     └── ConfigFileLocator.cs       # resolves ~/.config/hypr/
 ```
 
-### HyprlandService responsibilities
+### HyprlandService
 
-```
-1. Locate hyprland.conf
-2. Read all source= includes recursively
-3. Parse each file via HyprlangParser
-4. Provide unified view of the full config
-5. On save → write back only the files that changed
-6. Call hyprctl reload
-7. Verify source= lines exist, repair if missing
-```
+`HyprlandService` is the only component with full knowledge of the configuration lifecycle:
 
-### Semantic Layer (OptionRegistry)
+1. Locate `hyprland.conf` via `ConfigFileLocator`
+2. Recursively resolve and parse all `source=` includes via `HyprlangParser`
+3. Provide a unified in-memory view of the full configuration
+4. On save, write back only files that were modified
+5. Invoke `hyprctl reload`
+6. Verify that managed `source=` lines are present in `hyprland.conf` and offer to repair
+   them if missing
 
-Maps known options to their type and metadata:
+### Semantic Layer
+
+The `OptionRegistry` maps known configuration options to their type and metadata:
 
 ```csharp
 public record OptionDefinition(
@@ -148,12 +159,13 @@ public record OptionDefinition(
 );
 ```
 
-**Extensible by design.** Start with options you manage, ignore the rest.
-Unknown options pass through as `RawNode` untouched.
+Options not present in the registry pass through the parser as `RawNode` and are never
+modified. The registry is designed to grow incrementally — contributors can add definitions
+for new options or third-party plugins without touching parser or UI code.
 
 ### External Tool Map
 
-| Service              | Tools used                          | Communication     |
+| Service              | Tools                               | Communication     |
 |----------------------|-------------------------------------|-------------------|
 | `HyprlandService`    | `hyprctl`                           | CLI + IPC socket  |
 | `AudioService`       | `wpctl`, `pactl`                    | CLI stdout        |
@@ -161,15 +173,19 @@ Unknown options pass through as `RawNode` untouched.
 | `PowerService`       | `powerprofilesctl`, `upower`        | CLI stdout        |
 | `IdleService`        | `hypridle` (config only)            | Config file       |
 
-All CLI calls go through `CliRunner` — one place to mock in tests.
+All CLI invocations are routed through `CliRunner`, which is the single point of
+abstraction for process execution and the primary seam for testing.
 
 ---
 
 ## 3. Hypricing.Desktop
 
-**Role:** Avalonia UI. Presents data from Core services. No business logic.
+**Role:** Avalonia UI layer. Consumes `Core` services and presents data to the user.
+Contains no business logic.
+
 **Depends on:** `Hypricing.Core`
-**Pattern:** MVVM (one ViewModel per page)
+
+**Pattern:** MVVM — one `ViewModel` per page, bound to a corresponding `View`.
 
 ### Structure
 
@@ -179,9 +195,9 @@ Hypricing.Desktop/
 ├── Program.cs
 ├── Views/
 │   ├── MainWindow.axaml
-│   ├── DisplayView.axaml          # monitor drag-and-drop layout
-│   ├── VariablesView.axaml        # $var declarations editor
-│   ├── StartupView.axaml          # exec-once / exec manager
+│   ├── DisplayView.axaml
+│   ├── VariablesView.axaml
+│   ├── StartupView.axaml
 │   ├── AudioView.axaml
 │   ├── BluetoothView.axaml
 │   └── PowerView.axaml
@@ -194,17 +210,15 @@ Hypricing.Desktop/
 │   ├── BluetoothViewModel.cs
 │   └── PowerViewModel.cs
 └── Controls/
-    └── MonitorCanvas.cs           # custom drag-and-drop monitor control
+    └── MonitorCanvas.cs           # custom drag-and-drop monitor layout control
 ```
 
-### Startup sequence
+### Startup Sequence
 
-```
-1. Check hyprland.conf exists
-2. Check source= lines present → offer to add if missing
-3. Load all services
-4. Show main window
-```
+1. Verify `hyprland.conf` exists
+2. Verify managed `source=` lines are present — offer to add them if missing
+3. Initialize services
+4. Display main window
 
 ---
 
@@ -213,10 +227,10 @@ Hypricing.Desktop/
 ```
 tests/
 ├── Hypricing.HyprlangParser.Tests/
-│   └── (tests from PARSER_DESIGN.md test matrix)
+│   └── (see PARSER_DESIGN.md for full test matrix)
 └── Hypricing.Core.Tests/
-    ├── HyprlandServiceTests.cs    # source= resolution, reload
-    └── CliRunnerTests.cs          # mock CLI calls
+    ├── HyprlandServiceTests.cs
+    └── CliRunnerTests.cs
 ```
 
 ---
@@ -225,10 +239,10 @@ tests/
 
 | Version | Scope |
 |---------|-------|
-| v0.1 | `HyprlangParser` — full parser + writer + tests passing |
+| v0.1 | `HyprlangParser` — parser, writer, full test matrix passing |
 | v0.2 | Variables page — read/write `$var` declarations |
 | v0.3 | Display page — monitor layout drag-and-drop |
-| v0.4 | Startup page — exec-once / exec manager |
+| v0.4 | Startup page — `exec-once` / `exec` manager |
 | v0.5 | Audio page |
 | v0.6 | Power + Battery page |
 | v0.7 | Bluetooth page |
@@ -236,21 +250,12 @@ tests/
 
 ---
 
-## AOT Notes
-
-- No runtime reflection anywhere
-- `System.Text.Json` with source generators for all `hyprctl -j` deserialization
-- Avalonia 11 AOT compatible with correct trimming config
-- All node types are plain sealed classes
-- `CliRunner` uses `Process.Start` — AOT safe
-
----
-
 ## Type Design Guidelines
 
-### Use `sealed class` for
+### `sealed class` — AST nodes
 
-AST nodes — they are **mutable**, **polymorphic**, and **long-lived**:
+AST nodes are mutable, participate in a type hierarchy, and are long-lived. Reference
+semantics are appropriate. Value equality is not meaningful.
 
 ```csharp
 public sealed class SectionNode : ConfigNode
@@ -260,13 +265,10 @@ public sealed class SectionNode : ConfigNode
 }
 ```
 
-- Mutated when user edits config
-- Part of a tree (need base type)
-- Value equality is meaningless here
+### `record class` — definitions and catalog entries
 
-### Use `record class` for
-
-Read-only definitions and catalog entries — things you **compare by value** and **never mutate**:
+Immutable descriptors where value equality is meaningful. Suitable for `OptionDefinition`
+and similar read-only catalog types.
 
 ```csharp
 public record OptionDefinition(
@@ -278,20 +280,44 @@ public record OptionDefinition(
 );
 ```
 
-- Immutable once created
-- Value equality makes sense (same section+key = same option)
-- `with` expression useful for cloning with small changes
+### `record struct` — small value types
 
-### Use `record struct` for
-
-Small, short-lived value types with no heap pressure:
+Compound values with no identity semantics, short-lived, and allocation-sensitive.
 
 ```csharp
 public record struct Position(int X, int Y);
 public record struct Resolution(int Width, int Height);
 ```
 
-- Represent a single compound value
-- Created and discarded frequently
-- No polymorphism needed
-- Stack allocated → zero GC pressure
+---
+
+## Performance Notes
+
+`HyprlangParser` is implemented as a hand-written recursive descent parser. The following
+constraints apply to its internals to ensure minimal overhead:
+
+- The lexer operates on `ReadOnlySpan<char>`. No strings are allocated during tokenization.
+  Tokens are represented as `(TokenType, Range)` — two integers referencing a position in
+  the original input buffer.
+- The parser builds the AST from those ranges, allocating node objects only when a node is
+  confirmed complete.
+- Node child lists (`SectionNode.Children`) are pre-allocated with an estimated capacity to
+  avoid repeated resizing.
+- `sealed` is applied to all node types to enable JIT devirtualization.
+- The writer uses `StringBuilder` or a stack-based equivalent. No intermediate string
+  concatenation occurs in the serialization path.
+- LINQ is not used in any hot path within the lexer or parser.
+
+Hyprlang configuration files are typically 100–500 lines. At this scale, a compliant
+implementation should parse a full file in the low microsecond range on modern hardware.
+The goal is not to match Rust's zero-cost abstractions, but to remain within the same
+order of magnitude through disciplined use of `Span<T>` and avoiding unnecessary allocation.
+
+---
+
+## AOT Constraints
+
+- Runtime reflection is not permitted anywhere in the codebase.
+- `System.Text.Json` deserialization of `hyprctl -j` output must use source generators.
+- Avalonia 11 is AOT-compatible when trimming is configured correctly.
+- `CliRunner` uses `Process.Start` which is AOT-safe.
