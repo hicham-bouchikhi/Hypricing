@@ -243,3 +243,55 @@ tests/
 - Avalonia 11 AOT compatible with correct trimming config
 - All node types are plain sealed classes
 - `CliRunner` uses `Process.Start` — AOT safe
+
+---
+
+## Type Design Guidelines
+
+### Use `sealed class` for
+
+AST nodes — they are **mutable**, **polymorphic**, and **long-lived**:
+
+```csharp
+public sealed class SectionNode : ConfigNode
+{
+    public string Name { get; set; }
+    public List<ConfigNode> Children { get; set; } = [];
+}
+```
+
+- Mutated when user edits config
+- Part of a tree (need base type)
+- Value equality is meaningless here
+
+### Use `record class` for
+
+Read-only definitions and catalog entries — things you **compare by value** and **never mutate**:
+
+```csharp
+public record OptionDefinition(
+    string Section,
+    string Key,
+    OptionType Type,
+    object? Default,
+    string Description
+);
+```
+
+- Immutable once created
+- Value equality makes sense (same section+key = same option)
+- `with` expression useful for cloning with small changes
+
+### Use `record struct` for
+
+Small, short-lived value types with no heap pressure:
+
+```csharp
+public record struct Position(int X, int Y);
+public record struct Resolution(int Width, int Height);
+```
+
+- Represent a single compound value
+- Created and discarded frequently
+- No polymorphism needed
+- Stack allocated → zero GC pressure
