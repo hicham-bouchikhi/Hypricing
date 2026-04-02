@@ -97,6 +97,13 @@ string result = HyprlangWriter.Write(config);
 The parser is a hand-written **recursive descent parser** operating on `ReadOnlySpan<char>`
 to minimize heap allocations. See [Performance Notes](#performance-notes) for details.
 
+The grammar specification is derived from the official
+[tree-sitter-hyprlang](https://github.com/tree-sitter-grammars/tree-sitter-hyprlang) grammar.
+That grammar serves as the authoritative reference for what constitutes valid Hyprlang syntax.
+The Hyprland wiki is the reference for semantic meaning of each option:
+[Variables](https://wiki.hypr.land/Configuring/Variables/) ·
+[Keywords](https://wiki.hypr.land/Configuring/Keywords/).
+
 ---
 
 ## 2. Hypricing.Core

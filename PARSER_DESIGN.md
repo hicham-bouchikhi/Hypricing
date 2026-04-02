@@ -6,6 +6,13 @@ The `HyprlangParser` is the foundation of Hyprising. It is a standalone .NET 10 
 that parses `hyprland.conf` (Hyprlang syntax) into an in-memory AST, allows modification,
 and writes back to disk preserving everything it does not manage.
 
+## References
+
+- [tree-sitter-hyprlang](https://github.com/tree-sitter-grammars/tree-sitter-hyprlang) — grammar specification used as the authoritative syntax reference
+- [Hyprland Wiki — Variables](https://wiki.hypr.land/Configuring/Variables/) — semantic meaning of all configuration options
+- [Hyprland Wiki — Keywords](https://wiki.hypr.land/Configuring/Keywords/) — semantic meaning of all keywords (`bind`, `monitor`, `env`, `exec-once`, etc.)
+- [hyprwm/hyprlang](https://github.com/hyprwm/hyprlang) — official C++ Hyprlang implementation
+
 ---
 
 ## Architecture
