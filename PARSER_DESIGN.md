@@ -1,10 +1,10 @@
-# Hyprising — HyprlangParser Design Document
+# Hypricing — HyprlangParser Design Document
 
 ## Overview
 
-The `HyprlangParser` is the foundation of Hyprising. It is a standalone .NET 10 library
-that parses `hyprland.conf` (Hyprlang syntax) into an in-memory AST, allows modification,
-and writes back to disk preserving everything it does not manage.
+The `HyprlangParser` is the foundation of Hypricing. It is a standalone .NET 10 library
+that parses `hyprland.conf` (Hyprlang syntax) into an in-memory AST and allows modification.
+The caller is responsible for all file I/O — the parser only operates on strings.
 
 ## References
 
@@ -256,7 +256,6 @@ order of magnitude through disciplined use of `Span<T>` and avoiding unnecessary
 
 - No runtime reflection
 - No `dynamic` types
-- JSON deserialization (for `hyprctl -j`) uses `System.Text.Json` source generators
 - All node types are plain `sealed class` with no attributes requiring reflection
 
 ---
