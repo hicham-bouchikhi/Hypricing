@@ -63,7 +63,7 @@ Hypricing.HyprlangParser/
 │   ├── AssignmentNode.cs     # key = value
 │   ├── KeywordNode.cs        # keyword = param1,param2,...
 │   ├── SectionNode.cs        # name { children }
-│   ├── ExecNode.cs           # exec-once / exec / exec-shutdown
+│   ├── ExecNode.cs           # exec-once / exec / exec-shutdown / execr-once / execr
 │   ├── SourceNode.cs         # source = path
 │   ├── CommentNode.cs        # # comment
 │   ├── EmptyLineNode.cs      # blank line
@@ -349,7 +349,7 @@ public record OptionDefinition(
     string Section,
     string Key,
     OptionType Type,
-    object? Default,
+    string? Default,
     string Description
 );
 ```

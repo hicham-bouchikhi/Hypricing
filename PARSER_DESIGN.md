@@ -46,7 +46,7 @@ private ConfigNode ParseLine() => currentToken switch
 {
     TokenType.Dollar    => ParseDeclaration(),
     TokenType.Source    => ParseSource(),
-    TokenType.Exec      => ParseExec(),
+    TokenType.Exec      => ParseExec(),   // exec, exec-once, exec-shutdown, execr, execr-once
     TokenType.Name      => PeekAhead() == '{' ? ParseSection() : ParseAssignmentOrKeyword(),
     TokenType.Comment   => ParseComment(),
     TokenType.NewLine   => ParseEmptyLine(),
@@ -62,19 +62,24 @@ private ConfigNode ParseLine() => currentToken switch
 
 ### AST Node Types
 
-| Node              | Example                                       | Type        |
-|-------------------|-----------------------------------------------|-------------|
-| `DeclarationNode` | `$myvar = somevalue`                          | sealed class |
-| `AssignmentNode`  | `gaps_in = 5`                                 | sealed class |
-| `KeywordNode`     | `bind = SUPER,Q,killactive`                   | sealed class |
-| `SectionNode`     | `general { ... }`                             | sealed class |
-| `ExecNode`        | `exec-once = waybar`                          | sealed class |
-| `SourceNode`      | `source = ~/.config/hypr/other.conf`          | sealed class |
-| `CommentNode`     | `# this is a comment`                         | sealed class |
-| `EmptyLineNode`   | (blank line)                                  | sealed class |
-| `RawNode`         | anything unrecognized → preserved verbatim    | sealed class |
+| Node              | Example                                                  | Key fields                                              |
+|-------------------|----------------------------------------------------------|---------------------------------------------------------|
+| `DeclarationNode` | `$myvar = somevalue`                                     | `Name`, `Value`, `InlineComment?`                       |
+| `AssignmentNode`  | `gaps_in = 5`                                            | `Key`, `Value`, `InlineComment?`                        |
+| `KeywordNode`     | `bind = SUPER,Q,killactive`                              | `Keyword`, `Params`, `InlineComment?`                   |
+| `SectionNode`     | `general { ... }` / `device:kb { ... }`                  | `Name`, `Device?`, `Children`, `InlineComment?`         |
+| `ExecNode`        | `exec-once = [workspace 1 silent] kitty`                 | `Variant` (enum), `Rules?`, `Command`, `InlineComment?` |
+| `SourceNode`      | `source = ~/.config/hypr/other.conf`                     | `Path`, `InlineComment?`                                |
+| `CommentNode`     | `# this is a comment`                                    | raw line (Range)                                        |
+| `EmptyLineNode`   | (blank line)                                             | —                                                       |
+| `RawNode`         | anything unrecognized → preserved verbatim               | raw line (Range)                                        |
 
-All node types are `sealed` to enable JIT devirtualization.
+All node types are `sealed` to enable JIT devirtualization. `ExecNode.Variant` is an enum:
+```csharp
+enum ExecVariant { Once, OnceRestart, Reload, ExecrReload, Shutdown }
+```
+Each enum value maps 1:1 to its source keyword so the writer can reconstruct the exact original
+keyword for round-trip fidelity (`exec` → `Reload`, `execr` → `ExecrReload`).
 
 ### AssignmentNode vs KeywordNode
 
@@ -157,10 +162,16 @@ they do not copy their content. The writer resolves these ranges back to text vi
 | K-04 | `env = QT_QPA_PLATFORM,wayland`              | `env`            | `QT_QPA_PLATFORM,wayland` |
 | K-05 | `windowrule = float,^(pavucontrol)$`         | `windowrule`     | `float,^(pavucontrol)$` |
 | K-06 | `bind = $mod,Return,exec,kitty`              | `bind`           | `$mod,Return,exec,kitty` |
+| K-07 | `bind = SUPER,,killactive`                   | `bind`           | `SUPER,,killactive` (empty middle param is valid) |
 
 ---
 
 ### 4. Sections
+
+`DeclarationNode` (`$var = value`) is **only valid at the top level**. The grammar does not
+allow declarations inside sections — a `$var = x` line inside a section body is a parse error
+and must produce a `RawNode`, not a `DeclarationNode`. `exec` and `source` directives are also
+top-level only.
 
 | ID   | Input                                         | Expected Name | Children count |
 |------|-----------------------------------------------|---------------|----------------|
@@ -169,17 +180,44 @@ they do not copy their content. The writer resolves these ranges back to text vi
 | S-03 | `decoration { blur { enabled = true } }`      | `decoration`  | 1 (SectionNode)|
 | S-04 | `input { kb_layout = us\n }`                  | `input`       | 1              |
 | S-05 | `general { }`                                 | `general`     | 0              |
+| S-06 | `general { $var = x\n gaps_in = 5 }`          | `general`     | 2 (RawNode + AssignmentNode — declaration not valid inside section) |
 
 ---
 
 ### 5. Exec directives
 
-| ID   | Input                          | Expected Type  | Expected Command |
-|------|--------------------------------|----------------|------------------|
-| E-01 | `exec-once = waybar`           | `ExecNode`     | `waybar`, Once=true |
-| E-02 | `exec-once = dunst`            | `ExecNode`     | `dunst`, Once=true |
-| E-03 | `exec = ~/.config/hypr/start.sh` | `ExecNode`   | `~/.config/hypr/start.sh`, Once=false |
-| E-04 | `exec-shutdown = poweroff`     | `ExecNode`     | `poweroff`, Shutdown=true |
+`ExecNode` has three fields: `Command` (string), `Variant` (enum), and `Rules` (optional string).
+
+`Variant` covers all five keywords:
+
+| Keyword          | Variant        |
+|------------------|----------------|
+| `exec-once`      | `Once`         |
+| `exec`           | `Reload`       |
+| `exec-shutdown`  | `Shutdown`     |
+| `execr-once`     | `OnceRestart`  |
+| `execr`          | `ExecrReload`  |
+
+Only `exec-once` and `exec` optionally accept a **rules prefix** `[rule1; rule2]` before the
+command (per the grammar). This is commonly used in Hyprland to start apps on specific workspaces:
+```
+exec-once = [workspace 1 silent] kitty
+exec-once = [float; workspace 2] foot
+```
+The `Rules` field stores the raw bracket content (`workspace 1 silent` / `float; workspace 2`).
+`exec-shutdown`, `execr`, and `execr-once` do **not** accept a rules prefix.
+
+| ID   | Input                                              | Variant        | Rules                      | Command                    |
+|------|----------------------------------------------------|----------------|----------------------------|----------------------------|
+| E-01 | `exec-once = waybar`                               | `Once`         | null                       | `waybar`                   |
+| E-02 | `exec-once = dunst`                                | `Once`         | null                       | `dunst`                    |
+| E-03 | `exec = ~/.config/hypr/start.sh`                   | `Reload`       | null                       | `~/.config/hypr/start.sh`  |
+| E-04 | `exec-shutdown = poweroff`                         | `Shutdown`     | null                       | `poweroff`                 |
+| E-05 | `execr-once = waybar`                              | `OnceRestart`  | null                       | `waybar`                   |
+| E-06 | `execr = ~/.config/hypr/start.sh`                  | `Reload`       | null                       | `~/.config/hypr/start.sh`  |
+| E-07 | `exec-once = [workspace 1 silent] kitty`           | `Once`         | `workspace 1 silent`       | `kitty`                    |
+| E-08 | `exec-once = [float; workspace 2] foot`            | `Once`         | `float; workspace 2`       | `foot`                     |
+| E-09 | `execr = hyprpaper`                                | `ExecrReload`  | null                       | `hyprpaper`                |
 
 ---
 
@@ -194,11 +232,27 @@ they do not copy their content. The writer resolves these ranges back to text vi
 
 ### 7. Comments
 
-| ID   | Input                        | Expected Node   | Preserved verbatim |
-|------|------------------------------|-----------------|--------------------|
-| C-01 | `# this is a comment`        | `CommentNode`   | yes                |
-| C-02 | `# gaps_in = 5`              | `CommentNode`   | yes (not parsed as assignment) |
-| C-03 | `gaps_in = 5 # inline`       | `AssignmentNode`| value = `5`, comment preserved |
+Inline comments are stripped from the parsed value but preserved in a separate `InlineComment`
+field on the node (nullable string). The writer emits `{value} {inline_comment}` to guarantee
+round-trip fidelity. A `#` is only treated as starting an inline comment when it is preceded by
+whitespace or appears at the start of a token boundary — `##` is an escape sequence that produces
+a literal `#` in the value and does **not** start a comment.
+
+```
+gaps_in = 5 # inline    → value = "5",   InlineComment = "# inline"
+title = My app ## note  → value = "My app # note",  InlineComment = null
+```
+
+`AssignmentNode`, `KeywordNode`, `DeclarationNode`, `ExecNode`, and `SourceNode` all carry
+an optional `InlineComment` field. `SectionNode` header lines may also carry one.
+
+| ID   | Input                        | Expected Node   | Value / Content              | InlineComment  |
+|------|------------------------------|-----------------|------------------------------|----------------|
+| C-01 | `# this is a comment`        | `CommentNode`   | `# this is a comment`        | —              |
+| C-02 | `# gaps_in = 5`              | `CommentNode`   | `# gaps_in = 5`              | —              |
+| C-03 | `gaps_in = 5 # inline`       | `AssignmentNode`| value = `5`                  | `# inline`     |
+| C-04 | `title = My app ## note`     | `AssignmentNode`| value = `My app # note`      | null           |
+| C-05 | `bind = SUPER,Q,exec ## cmd` | `KeywordNode`   | params = `SUPER,Q,exec # cmd`| null           |
 
 ---
 
@@ -249,6 +303,11 @@ they do not copy their content. The writer resolves these ranges back to text vi
 | EC-06 | Windows line endings (CRLF)             | Handled gracefully                     |
 | EC-07 | Missing closing `}`                     | Meaningful parse error thrown          |
 | EC-08 | `device:my-keyboard { }`               | `SectionNode` with device name         |
+| EC-09 | `title = My app ## note`               | `AssignmentNode`, value = `My app # note`, no inline comment |
+| EC-10 | `exec-once = [float; ws 2] kitty`      | `ExecNode`, Variant = `Once`, Rules = `float; ws 2`, Command = `kitty` |
+| EC-11 | `execr-once = waybar`                  | `ExecNode`, Variant = `OnceRestart`    |
+| EC-12 | `$var = x` inside a section body       | `RawNode` (declarations not valid in sections) |
+| EC-13 | `bind = SUPER,,killactive`             | `KeywordNode`, Params = `SUPER,,killactive` (empty middle param) |
 
 ---
 
