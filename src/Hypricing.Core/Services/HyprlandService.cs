@@ -143,6 +143,41 @@ public class HyprlandService
     }
 
     /// <summary>
+    /// Returns all monitor keyword nodes across all loaded config files.
+    /// </summary>
+    public IReadOnlyList<KeywordNode> GetMonitors()
+    {
+        EnsureLoaded();
+        return AllNodes().OfType<KeywordNode>()
+            .Where(k => k.Keyword == "monitor")
+            .ToList();
+    }
+
+    /// <summary>
+    /// Adds a new monitor entry. Placed in the first file that already has monitor entries,
+    /// or the main config if none do.
+    /// </summary>
+    public void AddMonitor(string @params)
+    {
+        EnsureLoaded();
+        var target = _configs.FirstOrDefault(c =>
+                         c.Config.Children.OfType<KeywordNode>().Any(k => k.Keyword == "monitor"))
+                     ?? _configs[0];
+        target.Config.Children.Add(new KeywordNode("monitor", @params));
+    }
+
+    /// <summary>
+    /// Removes a monitor entry from whichever config file contains it.
+    /// </summary>
+    public void RemoveMonitor(KeywordNode node)
+    {
+        EnsureLoaded();
+        foreach (var loaded in _configs)
+            if (loaded.Config.Children.Remove(node))
+                return;
+    }
+
+    /// <summary>
     /// Returns all exec entries across all loaded config files.
     /// </summary>
     public IReadOnlyList<ExecNode> GetExecEntries()

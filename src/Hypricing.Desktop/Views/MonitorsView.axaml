@@ -1,0 +1,147 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Hypricing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Hypricing.Desktop.Views.MonitorsView"
+             x:DataType="vm:MonitorsViewModel">
+
+    <DockPanel>
+
+        <TextBlock DockPanel.Dock="Top"
+                   Classes="page-title"
+                   Text="Display" />
+
+        <!-- Bottom bar -->
+        <Border DockPanel.Dock="Bottom"
+                Classes="card-elevated"
+                CornerRadius="12,12,0,0"
+                Padding="20,14"
+                Margin="0,16,0,0">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0"
+                           Classes="status"
+                           Text="{Binding StatusMessage}" />
+                <Button Grid.Column="1"
+                        Classes="ghost"
+                        Content="Add Monitor"
+                        Command="{Binding AddCommand}"
+                        Margin="0,0,8,0" />
+                <Button Grid.Column="2"
+                        Classes="accent"
+                        Content="Save"
+                        Command="{Binding SaveCommand}" />
+            </Grid>
+        </Border>
+
+        <ScrollViewer>
+            <StackPanel Spacing="16">
+
+                <!-- Monitor canvas area -->
+                <Border Classes="card"
+                        MinHeight="320"
+                        ClipToBounds="True">
+                    <Canvas x:Name="MonitorCanvas"
+                            Background="Transparent"
+                            MinHeight="280" />
+                </Border>
+
+                <!-- Selected monitor properties -->
+                <Border Classes="card"
+                        IsVisible="{Binding SelectedMonitor, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <StackPanel Spacing="12"
+                                DataContext="{Binding SelectedMonitor}">
+                        <TextBlock Text="{Binding Name, StringFormat='Monitor: {0}'}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="#89b4fa" />
+
+                        <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+                            <!-- Name -->
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Text="Name"
+                                       Foreground="#6c7086"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,8" />
+                            <TextBox Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding Name, Mode=TwoWay}"
+                                     FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                     Margin="0,0,0,8" />
+
+                            <!-- Resolution -->
+                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                       Text="Width"
+                                       Foreground="#6c7086"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,8" />
+                            <Grid Grid.Row="1" Grid.Column="1"
+                                  ColumnDefinitions="*,20,*"
+                                  Margin="0,0,0,8">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding Width, Mode=TwoWay}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="x"
+                                           Foreground="#6c7086"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Column="2"
+                                         Text="{Binding Height, Mode=TwoWay}" />
+                            </Grid>
+
+                            <!-- Refresh rate -->
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Text="Hz"
+                                       Foreground="#6c7086"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,8" />
+                            <TextBox Grid.Row="2" Grid.Column="1"
+                                     Text="{Binding RefreshRate, Mode=TwoWay}"
+                                     Margin="0,0,0,8" />
+
+                            <!-- Position -->
+                            <TextBlock Grid.Row="3" Grid.Column="0"
+                                       Text="Position"
+                                       Foreground="#6c7086"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,8" />
+                            <Grid Grid.Row="3" Grid.Column="1"
+                                  ColumnDefinitions="*,20,*"
+                                  Margin="0,0,0,8">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding X, Mode=TwoWay}" />
+                                <TextBlock Grid.Column="1"
+                                           Text=","
+                                           Foreground="#6c7086"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Column="2"
+                                         Text="{Binding Y, Mode=TwoWay}" />
+                            </Grid>
+
+                            <!-- Scale -->
+                            <TextBlock Grid.Row="4" Grid.Column="0"
+                                       Text="Scale"
+                                       Foreground="#6c7086"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,8" />
+                            <TextBox Grid.Row="4" Grid.Column="1"
+                                     Text="{Binding Scale, Mode=TwoWay}"
+                                     Margin="0,0,0,8" />
+
+                            <!-- Remove -->
+                            <Button Grid.Row="5" Grid.Column="1"
+                                    Classes="danger"
+                                    Content="Remove Monitor"
+                                    Command="{Binding RemoveCommand}"
+                                    HorizontalAlignment="Left" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+
+</UserControl>

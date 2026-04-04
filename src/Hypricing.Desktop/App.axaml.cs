@@ -24,8 +24,9 @@ public partial class App : Application
             var variablesVm = new VariablesViewModel(service);
             var startupVm = new StartupViewModel(service);
             var keybindingsVm = new KeybindingsViewModel(service);
+            var monitorsVm = new MonitorsViewModel(service);
             var backupVm = new BackupViewModel(service);
-            var mainVm = new MainWindowViewModel(variablesVm, startupVm, keybindingsVm, backupVm);
+            var mainVm = new MainWindowViewModel(variablesVm, startupVm, keybindingsVm, monitorsVm, backupVm);
 
             desktop.MainWindow = new MainWindow
             {
@@ -39,6 +40,7 @@ public partial class App : Application
                 {
                     startupVm.Refresh();
                     keybindingsVm.Refresh();
+                    monitorsVm.Refresh();
                     backupVm.Refresh();
                 },
                 TaskScheduler.FromCurrentSynchronizationContext());

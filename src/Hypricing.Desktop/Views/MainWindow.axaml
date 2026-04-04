@@ -94,6 +94,9 @@
                     <DataTemplate DataType="vm:KeybindingsViewModel">
                         <views:KeybindingsView />
                     </DataTemplate>
+                    <DataTemplate DataType="vm:MonitorsViewModel">
+                        <views:MonitorsView />
+                    </DataTemplate>
                     <DataTemplate DataType="vm:BackupViewModel">
                         <views:BackupView />
                     </DataTemplate>
