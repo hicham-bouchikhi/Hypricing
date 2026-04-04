@@ -63,6 +63,22 @@ File.WriteAllText("hyprland.conf", HyprlangWriter.Write(config));
 - **No data loss**: unrecognized content becomes a `RawNode` and is written back as-is
 - **No I/O**: the caller is responsible for reading and writing files
 
+## Core
+
+Business logic layer that manages the Hyprland configuration lifecycle.
+
+- **ConfigFileLocator** — resolves `hyprland.conf` via `$HYPRLAND_CONFIG`, `$XDG_CONFIG_HOME`, or `~/.config/hypr/`
+- **CliRunner** — thin `Process.Start` wrapper, virtual methods for test subclassing
+- **HyprlandService** — load, modify, save config + `hyprctl reload`
+
+## Desktop
+
+Avalonia UI with sidebar navigation and MVVM pattern.
+
+**Current pages:**
+- **Variables** — view and edit `$var` declarations and `env` environment variables
+- Display, Startup, Audio, Power, Bluetooth — placeholders for future versions
+
 ## Building
 
 ```bash
@@ -75,12 +91,18 @@ dotnet build
 dotnet test
 ```
 
+## Running
+
+```bash
+dotnet run --project src/Hypricing.Desktop
+```
+
 ## Roadmap
 
 | Version | Scope |
 |---|---|
 | v0.1 | HyprlangParser — parser, writer, tests |
-| v0.2 | Variables page — read/write `$var` declarations |
+| v0.2 | Variables page — read/write `$var` declarations and `env` variables |
 | v0.3 | Display page — monitor layout drag-and-drop |
 | v0.4 | Startup page — exec manager |
 | v0.5 | Audio page |
