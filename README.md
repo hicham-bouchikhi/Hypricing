@@ -14,11 +14,7 @@ A GUI settings manager for [Hyprland](https://hyprland.org). Provides a graphica
 
 ## Screenshots
 
-![Variables](assets/variables.png)
-![Keybindings](assets/keybindings.png)
 ![Display](assets/display.png)
-![Startup](assets/startup.png)
-![Backups](assets/backups.png)
 
 ## Install
 
