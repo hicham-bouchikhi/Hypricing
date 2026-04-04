@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hypricing
+Comment=GUI settings manager for Hyprland
+Exec=hypricing
+Icon=hypricing
+Categories=Settings;DesktopSettings;
+Keywords=hyprland;settings;config;
