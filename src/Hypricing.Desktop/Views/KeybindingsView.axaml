@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Hypricing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Hypricing.Desktop.Views.KeybindingsView"
+             x:DataType="vm:KeybindingsViewModel">
+
+    <DockPanel Margin="16">
+
+        <!-- Header -->
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Keybindings"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Margin="0,0,0,16" />
+
+        <!-- Bottom bar: status + save -->
+        <Grid DockPanel.Dock="Bottom" Margin="0,16,0,0" ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0"
+                       Text="{Binding StatusMessage}"
+                       VerticalAlignment="Center"
+                       Foreground="Gray" />
+            <Button Grid.Column="1"
+                    Content="Save"
+                    Command="{Binding SaveCommand}" />
+        </Grid>
+
+        <!-- Add new keybinding -->
+        <Border DockPanel.Dock="Bottom"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,12,0,0"
+                Margin="0,8,0,0">
+            <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="100,100,100,*,Auto">
+                    <ComboBox Grid.Column="0"
+                              ItemsSource="{x:Static vm:BindItemViewModel.AllVariants}"
+                              SelectedItem="{Binding NewVariant}"
+                              Margin="0,0,8,0" />
+                    <TextBox Grid.Column="1"
+                             Text="{Binding NewModifiers, Mode=TwoWay}"
+                             Watermark="Mods"
+                             Margin="0,0,8,0" />
+                    <TextBox Grid.Column="2"
+                             Text="{Binding NewKey, Mode=TwoWay}"
+                             Watermark="Key"
+                             Margin="0,0,8,0" />
+                    <TextBox Grid.Column="3"
+                             Text="{Binding NewDispatcher, Mode=TwoWay}"
+                             Watermark="Dispatcher"
+                             Margin="0,0,8,0" />
+                    <Button Grid.Column="4"
+                            Content="Add"
+                            Command="{Binding AddCommand}" />
+                </Grid>
+                <TextBox Text="{Binding NewArgs, Mode=TwoWay}"
+                         Watermark="Args (optional)"
+                         IsVisible="{Binding NewDispatcher, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Keybindings list -->
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Keybindings}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:BindItemViewModel">
+                        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,6"
+                                Margin="0,0,0,2">
+                            <Grid ColumnDefinitions="80,100,80,*,Auto">
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Variant}"
+                                           VerticalAlignment="Center"
+                                           FontFamily="monospace"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Modifiers, Mode=TwoWay}"
+                                         Watermark="Mods"
+                                         Margin="4,0" />
+                                <TextBox Grid.Column="2"
+                                         Text="{Binding Key, Mode=TwoWay}"
+                                         Watermark="Key"
+                                         Margin="4,0" />
+                                <TextBox Grid.Column="3"
+                                         Text="{Binding Dispatcher, Mode=TwoWay}"
+                                         Watermark="Dispatcher, Args"
+                                         Margin="4,0" />
+                                <Button Grid.Column="4"
+                                        Content="Remove"
+                                        Command="{Binding RemoveCommand}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
+
+</UserControl>

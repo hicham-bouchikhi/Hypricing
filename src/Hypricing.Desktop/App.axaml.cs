@@ -23,8 +23,9 @@ public partial class App : Application
             var service = new HyprlandService(cli);
             var variablesVm = new VariablesViewModel(service);
             var startupVm = new StartupViewModel(service);
+            var keybindingsVm = new KeybindingsViewModel(service);
             var backupVm = new BackupViewModel(service);
-            var mainVm = new MainWindowViewModel(variablesVm, startupVm, backupVm);
+            var mainVm = new MainWindowViewModel(variablesVm, startupVm, keybindingsVm, backupVm);
 
             desktop.MainWindow = new MainWindow
             {
@@ -37,6 +38,7 @@ public partial class App : Application
             _ = variablesVm.LoadAsync().ContinueWith(_ =>
                 {
                     startupVm.Refresh();
+                    keybindingsVm.Refresh();
                     backupVm.Refresh();
                 },
                 TaskScheduler.FromCurrentSynchronizationContext());

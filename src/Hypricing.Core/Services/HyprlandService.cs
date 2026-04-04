@@ -108,6 +108,41 @@ public class HyprlandService
     }
 
     /// <summary>
+    /// Returns all bind/binde/bindm/… keyword nodes across all loaded config files.
+    /// </summary>
+    public IReadOnlyList<KeywordNode> GetKeybindings()
+    {
+        EnsureLoaded();
+        return AllNodes().OfType<KeywordNode>()
+            .Where(k => k.Keyword.StartsWith("bind"))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Adds a new keybinding. Placed in the first file that already has bind entries,
+    /// or the main config if none do.
+    /// </summary>
+    public void AddKeybinding(string variant, string @params)
+    {
+        EnsureLoaded();
+        var target = _configs.FirstOrDefault(c =>
+                         c.Config.Children.OfType<KeywordNode>().Any(k => k.Keyword.StartsWith("bind")))
+                     ?? _configs[0];
+        target.Config.Children.Add(new KeywordNode(variant, @params));
+    }
+
+    /// <summary>
+    /// Removes a keybinding from whichever config file contains it.
+    /// </summary>
+    public void RemoveKeybinding(KeywordNode node)
+    {
+        EnsureLoaded();
+        foreach (var loaded in _configs)
+            if (loaded.Config.Children.Remove(node))
+                return;
+    }
+
+    /// <summary>
     /// Returns all exec entries across all loaded config files.
     /// </summary>
     public IReadOnlyList<ExecNode> GetExecEntries()

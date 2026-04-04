@@ -9,6 +9,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         VariablesViewModel variablesPage,
         StartupViewModel startupPage,
+        KeybindingsViewModel keybindingsPage,
         BackupViewModel backupPage)
     {
         BackupPage = backupPage;
@@ -16,8 +17,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         Pages =
         [
             new PageItem("Variables", variablesPage),
-            new PageItem("Display", new PlaceholderViewModel("Display")),
+            new PageItem("Keybindings", keybindingsPage),
             new PageItem("Startup", startupPage),
+            new PageItem("Display", new PlaceholderViewModel("Display")),
             new PageItem("Audio", new PlaceholderViewModel("Audio")),
             new PageItem("Power", new PlaceholderViewModel("Power")),
             new PageItem("Bluetooth", new PlaceholderViewModel("Bluetooth")),

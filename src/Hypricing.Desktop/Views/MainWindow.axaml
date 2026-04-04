@@ -54,6 +54,9 @@
                 <DataTemplate DataType="vm:StartupViewModel">
                     <views:StartupView />
                 </DataTemplate>
+                <DataTemplate DataType="vm:KeybindingsViewModel">
+                    <views:KeybindingsView />
+                </DataTemplate>
                 <DataTemplate DataType="vm:BackupViewModel">
                     <views:BackupView />
                 </DataTemplate>
