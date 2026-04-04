@@ -46,7 +46,7 @@ public sealed class ExecNode : SyntaxNode
     public string Command { get => _command; set { _command = value; IsDirty = true; } }
     public string? InlineComment { get => _inlineComment; set { _inlineComment = value; IsDirty = true; } }
 
-    internal static bool TryParseVariant(string keyword, out ExecVariant variant)
+    public static bool TryParseVariant(string keyword, out ExecVariant variant)
     {
         switch (keyword)
         {
@@ -59,7 +59,7 @@ public sealed class ExecNode : SyntaxNode
         }
     }
 
-    internal static string VariantToKeyword(ExecVariant variant) => variant switch
+    public static string VariantToKeyword(ExecVariant variant) => variant switch
     {
         ExecVariant.Once => "exec-once",
         ExecVariant.OnceRestart => "execr-once",
