@@ -50,8 +50,10 @@ public sealed class JsonAudioBackend : IAudioBackend
 
     public Task SetVolumeAsync(int deviceId, double volume, CancellationToken ct = default)
     {
+        var pct = (int)Math.Round(volume * 100);
         var cmd = _preset.Commands.SetVolume
             .Replace("{id}", deviceId.ToString())
+            .Replace("{volumePct}", pct + "%")
             .Replace("{volume}", volume.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         return RunFireAndForgetAsync(cmd, ct);
     }
@@ -63,17 +65,19 @@ public sealed class JsonAudioBackend : IAudioBackend
         return RunFireAndForgetAsync(cmd, ct);
     }
 
-    public Task SetDefaultSinkAsync(int deviceId, CancellationToken ct = default)
+    public Task SetDefaultSinkAsync(int deviceId, string deviceName, CancellationToken ct = default)
     {
         var cmd = _preset.Commands.SetDefaultSink
-            .Replace("{id}", deviceId.ToString());
+            .Replace("{id}", deviceId.ToString())
+            .Replace("{name}", deviceName);
         return RunFireAndForgetAsync(cmd, ct);
     }
 
-    public Task SetDefaultSourceAsync(int deviceId, CancellationToken ct = default)
+    public Task SetDefaultSourceAsync(int deviceId, string deviceName, CancellationToken ct = default)
     {
         var cmd = _preset.Commands.SetDefaultSource
-            .Replace("{id}", deviceId.ToString());
+            .Replace("{id}", deviceId.ToString())
+            .Replace("{name}", deviceName);
         return RunFireAndForgetAsync(cmd, ct);
     }
 
@@ -87,8 +91,10 @@ public sealed class JsonAudioBackend : IAudioBackend
 
     public Task SetStreamVolumeAsync(int streamId, double volume, CancellationToken ct = default)
     {
+        var pct = (int)Math.Round(volume * 100);
         var cmd = _preset.Commands.SetStreamVolume
             .Replace("{streamId}", streamId.ToString())
+            .Replace("{volumePct}", pct + "%")
             .Replace("{volume}", volume.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         return RunFireAndForgetAsync(cmd, ct);
     }

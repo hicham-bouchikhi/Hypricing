@@ -70,11 +70,22 @@
                                                         Command="{Binding ToggleMuteCommand}" />
                                             </Grid>
                                             <Grid ColumnDefinitions="*,50">
-                                                <Slider Grid.Column="0"
-                                                        Minimum="0"
-                                                        Maximum="1.5"
-                                                        Value="{Binding Volume, Mode=TwoWay}"
-                                                        TickFrequency="0.01" />
+                                                <Grid Grid.Column="0">
+                                                    <Slider Minimum="0"
+                                                            Maximum="1.5"
+                                                            Value="{Binding Volume, Mode=TwoWay}"
+                                                            TickFrequency="0.01" />
+                                                    <!-- 100% tick mark overlay -->
+                                                    <Grid ColumnDefinitions="2*,1*"
+                                                          IsHitTestVisible="False"
+                                                          Margin="10,0">
+                                                        <Border Grid.Column="1"
+                                                                Width="2" Height="12"
+                                                                Background="#585b70"
+                                                                HorizontalAlignment="Left"
+                                                                VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Grid>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
                                                            HorizontalAlignment="Right"
@@ -116,11 +127,21 @@
                                                         Content="Mute" />
                                             </Grid>
                                             <Grid ColumnDefinitions="*,50">
-                                                <Slider Grid.Column="0"
-                                                        Minimum="0"
-                                                        Maximum="1.5"
-                                                        Value="{Binding Volume, Mode=TwoWay}"
-                                                        TickFrequency="0.01" />
+                                                <Grid Grid.Column="0">
+                                                    <Slider Minimum="0"
+                                                            Maximum="1.5"
+                                                            Value="{Binding Volume, Mode=TwoWay}"
+                                                            TickFrequency="0.01" />
+                                                    <Grid ColumnDefinitions="2*,1*"
+                                                          IsHitTestVisible="False"
+                                                          Margin="10,0">
+                                                        <Border Grid.Column="1"
+                                                                Width="2" Height="12"
+                                                                Background="#585b70"
+                                                                HorizontalAlignment="Left"
+                                                                VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Grid>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
                                                            HorizontalAlignment="Right"
@@ -164,11 +185,21 @@
                                                 </ComboBox>
                                             </Grid>
                                             <Grid ColumnDefinitions="*,50">
-                                                <Slider Grid.Column="0"
-                                                        Minimum="0"
-                                                        Maximum="1.5"
-                                                        Value="{Binding Volume, Mode=TwoWay}"
-                                                        TickFrequency="0.01" />
+                                                <Grid Grid.Column="0">
+                                                    <Slider Minimum="0"
+                                                            Maximum="1.5"
+                                                            Value="{Binding Volume, Mode=TwoWay}"
+                                                            TickFrequency="0.01" />
+                                                    <Grid ColumnDefinitions="2*,1*"
+                                                          IsHitTestVisible="False"
+                                                          Margin="10,0">
+                                                        <Border Grid.Column="1"
+                                                                Width="2" Height="12"
+                                                                Background="#585b70"
+                                                                HorizontalAlignment="Left"
+                                                                VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Grid>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
                                                            HorizontalAlignment="Right"

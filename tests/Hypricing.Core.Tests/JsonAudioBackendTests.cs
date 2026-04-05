@@ -189,7 +189,7 @@ public class JsonAudioBackendTests
         var cli = new FakeCliRunner("");
         var backend = new JsonAudioBackend(cli, CreatePipewirePreset());
 
-        await backend.SetDefaultSinkAsync(148);
+        await backend.SetDefaultSinkAsync(148, "bluez_output.airpods");
 
         Assert.Single(cli.Invocations);
         Assert.Equal("wpctl", cli.Invocations[0].Command);

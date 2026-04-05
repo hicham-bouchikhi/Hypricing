@@ -22,10 +22,10 @@ public interface IAudioBackend
     Task ToggleMuteAsync(int deviceId, CancellationToken ct = default);
 
     /// <summary>Set the default output device.</summary>
-    Task SetDefaultSinkAsync(int deviceId, CancellationToken ct = default);
+    Task SetDefaultSinkAsync(int deviceId, string deviceName, CancellationToken ct = default);
 
     /// <summary>Set the default input device.</summary>
-    Task SetDefaultSourceAsync(int deviceId, CancellationToken ct = default);
+    Task SetDefaultSourceAsync(int deviceId, string deviceName, CancellationToken ct = default);
 
     /// <summary>Move a stream to a different sink.</summary>
     Task MoveStreamAsync(int streamId, int sinkId, CancellationToken ct = default);

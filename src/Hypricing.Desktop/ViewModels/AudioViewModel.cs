@@ -118,18 +118,24 @@ public sealed class SinkViewModel : ViewModelBase
     public bool Muted => _device.Muted;
     public string MuteLabel => _device.Muted ? "Unmute" : "Mute";
     public bool IsDefault => _device.IsDefault;
-    public int VolumePercent => (int)Math.Round(_device.Volume * 100);
+    public int VolumePercent => (int)Math.Round(_volume * 100);
 
     public double Volume
     {
         get => _volume;
         set
         {
-            if (Math.Abs(_volume - value) < 0.005) return;
-            _volume = value;
+            var snapped = value is > 0.98 and < 1.03 ? 1.0 : value;
+
+            if (Math.Abs(_volume - snapped) < 0.005) return;
+            _volume = snapped;
             OnPropertyChanged();
             OnPropertyChanged(nameof(VolumePercent));
-            _ = SetVolumeAsync(value);
+            _ = SetVolumeAsync(snapped);
+
+            // Force slider to jump to snapped position on next frame
+            if (Math.Abs(snapped - value) > 0.005)
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Volume)));
         }
     }
 
@@ -149,7 +155,7 @@ public sealed class SinkViewModel : ViewModelBase
 
     private async Task SetDefaultAsync()
     {
-        await _backend.SetDefaultSinkAsync(_device.Id);
+        await _backend.SetDefaultSinkAsync(_device.Id, _device.Name);
         await _parent.OnChanged();
     }
 }
@@ -180,7 +186,7 @@ public sealed class StreamViewModel : ViewModelBase
     public string AppName => _stream.AppName;
     public int SinkId => _stream.SinkId;
     public bool Muted => _stream.Muted;
-    public int VolumePercent => (int)Math.Round(_stream.Volume * 100);
+    public int VolumePercent => (int)Math.Round(_volume * 100);
     public ObservableCollection<SinkViewModel> AvailableSinks { get; }
 
     public double Volume
@@ -188,11 +194,16 @@ public sealed class StreamViewModel : ViewModelBase
         get => _volume;
         set
         {
-            if (Math.Abs(_volume - value) < 0.005) return;
-            _volume = value;
+            var snapped = value is > 0.98 and < 1.03 ? 1.0 : value;
+
+            if (Math.Abs(_volume - snapped) < 0.005) return;
+            _volume = snapped;
             OnPropertyChanged();
             OnPropertyChanged(nameof(VolumePercent));
-            _ = _backend.SetStreamVolumeAsync(_stream.Id, value);
+            _ = _backend.SetStreamVolumeAsync(_stream.Id, snapped);
+
+            if (Math.Abs(snapped - value) > 0.005)
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Volume)));
         }
     }
 

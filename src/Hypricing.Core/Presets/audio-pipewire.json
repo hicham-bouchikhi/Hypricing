@@ -1,5 +1,5 @@
 {
-  "name": "PipeWire (wpctl + pactl)",
+  "name": "PipeWire (pactl)",
   "detect": "wpctl",
   "commands": {
     "listSinks": {
@@ -35,13 +35,13 @@
         "muted": "mute"
       }
     },
-    "setVolume": "wpctl set-volume {id} {volume}",
-    "toggleMute": "wpctl set-mute {id} toggle",
-    "setDefaultSink": "wpctl set-default {id}",
-    "setDefaultSource": "wpctl set-default {id}",
+    "setVolume": "pactl set-sink-volume {id} {volumePct}",
+    "toggleMute": "pactl set-sink-mute {id} toggle",
+    "setDefaultSink": "pactl set-default-sink {name}",
+    "setDefaultSource": "pactl set-default-source {name}",
     "getDefaultSink": "pactl get-default-sink",
     "getDefaultSource": "pactl get-default-source",
     "moveStream": "pactl move-sink-input {streamId} {sinkId}",
-    "setStreamVolume": "pactl set-sink-input-volume {streamId} {volume}"
+    "setStreamVolume": "pactl set-sink-input-volume {streamId} {volumePct}"
   }
 }
