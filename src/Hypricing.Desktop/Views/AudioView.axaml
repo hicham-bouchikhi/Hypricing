@@ -69,24 +69,21 @@
                                                         Content="{Binding MuteLabel}"
                                                         Command="{Binding ToggleMuteCommand}" />
                                             </Grid>
-                                            <Grid ColumnDefinitions="*,50">
-                                                <Grid Grid.Column="0">
-                                                    <Slider Minimum="0"
-                                                            Maximum="1.5"
-                                                            Value="{Binding Volume, Mode=TwoWay}"
-                                                            TickFrequency="0.01" />
-                                                    <!-- 100% tick mark overlay -->
-                                                    <Grid ColumnDefinitions="2*,1*"
-                                                          IsHitTestVisible="False"
-                                                          Margin="10,0">
-                                                        <Border Grid.Column="1"
-                                                                Width="2" Height="12"
-                                                                Background="#585b70"
-                                                                HorizontalAlignment="Left"
-                                                                VerticalAlignment="Center" />
-                                                    </Grid>
-                                                </Grid>
-                                                <TextBlock Grid.Column="1"
+                                            <Grid ColumnDefinitions="*,Auto,50">
+                                                <Slider Grid.Column="0"
+                                                        Minimum="0"
+                                                        Maximum="{Binding SliderMax}"
+                                                        Value="{Binding Volume, Mode=TwoWay}"
+                                                        TickFrequency="0.01" />
+                                                <ToggleButton Grid.Column="1"
+                                                              IsChecked="{Binding BoostEnabled, Mode=TwoWay}"
+                                                              Content="150%"
+                                                              FontSize="10"
+                                                              Padding="6,2"
+                                                              Margin="4,0"
+                                                              VerticalAlignment="Center"
+                                                              ToolTip.Tip="Allow volume above 100%" />
+                                                <TextBlock Grid.Column="2"
                                                            Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"
@@ -126,23 +123,21 @@
                                                         Command="{Binding ToggleMuteCommand}"
                                                         Content="Mute" />
                                             </Grid>
-                                            <Grid ColumnDefinitions="*,50">
-                                                <Grid Grid.Column="0">
-                                                    <Slider Minimum="0"
-                                                            Maximum="1.5"
-                                                            Value="{Binding Volume, Mode=TwoWay}"
-                                                            TickFrequency="0.01" />
-                                                    <Grid ColumnDefinitions="2*,1*"
-                                                          IsHitTestVisible="False"
-                                                          Margin="10,0">
-                                                        <Border Grid.Column="1"
-                                                                Width="2" Height="12"
-                                                                Background="#585b70"
-                                                                HorizontalAlignment="Left"
-                                                                VerticalAlignment="Center" />
-                                                    </Grid>
-                                                </Grid>
-                                                <TextBlock Grid.Column="1"
+                                            <Grid ColumnDefinitions="*,Auto,50">
+                                                <Slider Grid.Column="0"
+                                                        Minimum="0"
+                                                        Maximum="{Binding SliderMax}"
+                                                        Value="{Binding Volume, Mode=TwoWay}"
+                                                        TickFrequency="0.01" />
+                                                <ToggleButton Grid.Column="1"
+                                                              IsChecked="{Binding BoostEnabled, Mode=TwoWay}"
+                                                              Content="150%"
+                                                              FontSize="10"
+                                                              Padding="6,2"
+                                                              Margin="4,0"
+                                                              VerticalAlignment="Center"
+                                                              ToolTip.Tip="Allow volume above 100%" />
+                                                <TextBlock Grid.Column="2"
                                                            Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"
@@ -184,23 +179,21 @@
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
                                             </Grid>
-                                            <Grid ColumnDefinitions="*,50">
-                                                <Grid Grid.Column="0">
-                                                    <Slider Minimum="0"
-                                                            Maximum="1.5"
-                                                            Value="{Binding Volume, Mode=TwoWay}"
-                                                            TickFrequency="0.01" />
-                                                    <Grid ColumnDefinitions="2*,1*"
-                                                          IsHitTestVisible="False"
-                                                          Margin="10,0">
-                                                        <Border Grid.Column="1"
-                                                                Width="2" Height="12"
-                                                                Background="#585b70"
-                                                                HorizontalAlignment="Left"
-                                                                VerticalAlignment="Center" />
-                                                    </Grid>
-                                                </Grid>
-                                                <TextBlock Grid.Column="1"
+                                            <Grid ColumnDefinitions="*,Auto,50">
+                                                <Slider Grid.Column="0"
+                                                        Minimum="0"
+                                                        Maximum="{Binding SliderMax}"
+                                                        Value="{Binding Volume, Mode=TwoWay}"
+                                                        TickFrequency="0.01" />
+                                                <ToggleButton Grid.Column="1"
+                                                              IsChecked="{Binding BoostEnabled, Mode=TwoWay}"
+                                                              Content="150%"
+                                                              FontSize="10"
+                                                              Padding="6,2"
+                                                              Margin="4,0"
+                                                              VerticalAlignment="Center"
+                                                              ToolTip.Tip="Allow volume above 100%" />
+                                                <TextBlock Grid.Column="2"
                                                            Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"

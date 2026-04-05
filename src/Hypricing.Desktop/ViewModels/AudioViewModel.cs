@@ -101,6 +101,7 @@ public sealed class SinkViewModel : ViewModelBase
     private readonly IAudioBackend _backend;
     private readonly AudioViewModel _parent;
     private double _volume;
+    private bool _boostEnabled;
 
     public SinkViewModel(AudioDevice device, IAudioBackend backend, AudioViewModel parent)
     {
@@ -108,6 +109,7 @@ public sealed class SinkViewModel : ViewModelBase
         _backend = backend;
         _parent = parent;
         _volume = device.Volume;
+        _boostEnabled = device.Volume > 1.0;
         ToggleMuteCommand = new AsyncRelayCommand(ToggleMuteAsync);
         SetDefaultCommand = new AsyncRelayCommand(SetDefaultAsync);
     }
@@ -119,23 +121,34 @@ public sealed class SinkViewModel : ViewModelBase
     public string MuteLabel => _device.Muted ? "Unmute" : "Mute";
     public bool IsDefault => _device.IsDefault;
     public int VolumePercent => (int)Math.Round(_volume * 100);
+    public double SliderMax => _boostEnabled ? 1.5 : 1.0;
+
+    public bool BoostEnabled
+    {
+        get => _boostEnabled;
+        set
+        {
+            if (_boostEnabled == value) return;
+            _boostEnabled = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SliderMax));
+            if (!value && _volume > 1.0)
+            {
+                Volume = 1.0;
+            }
+        }
+    }
 
     public double Volume
     {
         get => _volume;
         set
         {
-            var snapped = value is > 0.98 and < 1.03 ? 1.0 : value;
-
-            if (Math.Abs(_volume - snapped) < 0.005) return;
-            _volume = snapped;
+            if (Math.Abs(_volume - value) < 0.005) return;
+            _volume = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(VolumePercent));
-            _ = SetVolumeAsync(snapped);
-
-            // Force slider to jump to snapped position on next frame
-            if (Math.Abs(snapped - value) > 0.005)
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Volume)));
+            _ = SetVolumeAsync(value);
         }
     }
 
@@ -166,6 +179,7 @@ public sealed class StreamViewModel : ViewModelBase
     private readonly IAudioBackend _backend;
     private readonly AudioViewModel _parent;
     private double _volume;
+    private bool _boostEnabled;
     private SinkViewModel? _targetSink;
 
     public StreamViewModel(
@@ -178,6 +192,7 @@ public sealed class StreamViewModel : ViewModelBase
         _backend = backend;
         _parent = parent;
         _volume = stream.Volume;
+        _boostEnabled = stream.Volume > 1.0;
         AvailableSinks = sinks;
         _targetSink = sinks.FirstOrDefault(s => s.Id == stream.SinkId);
     }
@@ -187,23 +202,35 @@ public sealed class StreamViewModel : ViewModelBase
     public int SinkId => _stream.SinkId;
     public bool Muted => _stream.Muted;
     public int VolumePercent => (int)Math.Round(_volume * 100);
+    public double SliderMax => _boostEnabled ? 1.5 : 1.0;
     public ObservableCollection<SinkViewModel> AvailableSinks { get; }
+
+    public bool BoostEnabled
+    {
+        get => _boostEnabled;
+        set
+        {
+            if (_boostEnabled == value) return;
+            _boostEnabled = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SliderMax));
+            if (!value && _volume > 1.0)
+            {
+                Volume = 1.0;
+            }
+        }
+    }
 
     public double Volume
     {
         get => _volume;
         set
         {
-            var snapped = value is > 0.98 and < 1.03 ? 1.0 : value;
-
-            if (Math.Abs(_volume - snapped) < 0.005) return;
-            _volume = snapped;
+            if (Math.Abs(_volume - value) < 0.005) return;
+            _volume = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(VolumePercent));
-            _ = _backend.SetStreamVolumeAsync(_stream.Id, snapped);
-
-            if (Math.Abs(snapped - value) > 0.005)
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Volume)));
+            _ = _backend.SetStreamVolumeAsync(_stream.Id, value);
         }
     }
 
