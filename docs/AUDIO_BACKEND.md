@@ -152,21 +152,23 @@ Action commands are plain strings with placeholders:
 
 ```json
 {
-  "setVolume": "wpctl set-volume {id} {volume}",
-  "toggleMute": "wpctl set-mute {id} toggle",
-  "setDefaultSink": "wpctl set-default {id}",
-  "setDefaultSource": "wpctl set-default {id}",
+  "setVolume": "pactl set-sink-volume {id} {volumePct}",
+  "toggleMute": "pactl set-sink-mute {id} toggle",
+  "setDefaultSink": "pactl set-default-sink {name}",
+  "setDefaultSource": "pactl set-default-source {name}",
   "getDefaultSink": "pactl get-default-sink",
   "getDefaultSource": "pactl get-default-source",
   "moveStream": "pactl move-sink-input {streamId} {sinkId}",
-  "setStreamVolume": "pactl set-sink-input-volume {streamId} {volume}"
+  "setStreamVolume": "pactl set-sink-input-volume {streamId} {volumePct}"
 }
 ```
 
 | Placeholder | Replaced with |
 |---|---|
 | `{id}` | Device ID |
+| `{name}` | Device name (internal identifier) |
 | `{volume}` | Volume as decimal (e.g., `0.74`) |
+| `{volumePct}` | Volume as percentage (e.g., `75%`) |
 | `{streamId}` | Stream ID |
 | `{sinkId}` | Target sink ID |
 
@@ -180,9 +182,9 @@ listing). This is how the "Default" badge is determined in the UI.
 
 For systems using PipeWire (most modern Wayland setups).
 
-- **Detected via:** `wpctl`
-- **Listing:** `pactl -f json` (PipeWire provides pactl compatibility)
-- **Device control:** `wpctl set-volume`, `wpctl set-mute`, `wpctl set-default`
+- **Detected via:** `wpctl` (but all commands use `pactl` for consistent IDs)
+- **Listing:** `pactl -f json`
+- **Device control:** `pactl set-sink-volume`, `pactl set-sink-mute`, `pactl set-default-sink`
 - **Stream control:** `pactl move-sink-input`, `pactl set-sink-input-volume`
 
 ### PulseAudio (`audio-pulseaudio.json`)

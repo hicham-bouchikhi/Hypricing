@@ -8,6 +8,7 @@ A GUI settings manager for [Hyprland](https://hyprland.org). Provides a graphica
 - **Keybindings** — manage `bind`, `binde`, `bindm` and other bind variants
 - **Display** — drag-and-drop monitor layout with edge snapping
 - **Startup** — manage `exec`, `exec-once`, and `exec-shutdown` entries
+- **Audio** — volume, mute, default device, stream routing (PipeWire + PulseAudio, extensible via JSON presets)
 - **Backups** — create, restore, and delete zip backups of all config files
 - **Multi-file support** — follows `source =` includes across config files
 - **Native AOT** — 18MB self-contained binary, no runtime needed
@@ -40,10 +41,9 @@ sudo cp publish/Hypricing.Desktop /usr/bin/hypricing
 
 | Version | Scope |
 |---|---|
-| v0.1 | Parser, variables, keybindings, display, startup, backups, Native AOT, AUR packaging |
-| v0.2 | Audio page |
-| v0.3 | Power + Battery page |
-| v0.4 | Bluetooth page |
+| v0.1 | Parser, variables, keybindings, display, startup, backups, audio, Native AOT, AUR packaging |
+| v0.2 | Power page (profiles, hypridle, battery) |
+| v0.3 | Bluetooth page |
 | v1.0 | Polish, themes, structured inputs |
 
 ## Project Structure
