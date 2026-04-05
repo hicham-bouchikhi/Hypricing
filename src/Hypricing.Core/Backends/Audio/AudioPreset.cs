@@ -41,6 +41,12 @@ public sealed class AudioPresetCommands
     [JsonPropertyName("setDefaultSource")]
     public string SetDefaultSource { get; set; } = string.Empty;
 
+    [JsonPropertyName("getDefaultSink")]
+    public string GetDefaultSink { get; set; } = string.Empty;
+
+    [JsonPropertyName("getDefaultSource")]
+    public string GetDefaultSource { get; set; } = string.Empty;
+
     [JsonPropertyName("moveStream")]
     public string MoveStream { get; set; } = string.Empty;
 

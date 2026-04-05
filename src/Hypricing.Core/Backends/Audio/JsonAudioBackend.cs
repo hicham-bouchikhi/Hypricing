@@ -27,14 +27,18 @@ public sealed class JsonAudioBackend : IAudioBackend
     {
         var cmd = _preset.Commands.ListSinks;
         var json = await RunJsonCommandAsync(cmd.Run, ct);
-        return ParseDevices(json, cmd.Fields);
+        var defaultName = await GetDefaultNameAsync(_preset.Commands.GetDefaultSink, ct);
+        return ParseDevices(json, cmd.Fields, defaultName);
     }
 
     public async Task<IReadOnlyList<AudioDevice>> ListSourcesAsync(CancellationToken ct = default)
     {
         var cmd = _preset.Commands.ListSources;
         var json = await RunJsonCommandAsync(cmd.Run, ct);
-        return ParseDevices(json, cmd.Fields);
+        var defaultName = await GetDefaultNameAsync(_preset.Commands.GetDefaultSource, ct);
+        var devices = ParseDevices(json, cmd.Fields, defaultName);
+        // Filter out monitor sources (loopback captures of output devices)
+        return devices.Where(d => !d.Name.Contains(".monitor")).ToList();
     }
 
     public async Task<IReadOnlyList<AudioStream>> ListStreamsAsync(CancellationToken ct = default)
@@ -48,7 +52,7 @@ public sealed class JsonAudioBackend : IAudioBackend
     {
         var cmd = _preset.Commands.SetVolume
             .Replace("{id}", deviceId.ToString())
-            .Replace("{volume}", volume.ToString("F2"));
+            .Replace("{volume}", volume.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         return RunFireAndForgetAsync(cmd, ct);
     }
 
@@ -85,7 +89,7 @@ public sealed class JsonAudioBackend : IAudioBackend
     {
         var cmd = _preset.Commands.SetStreamVolume
             .Replace("{streamId}", streamId.ToString())
-            .Replace("{volume}", volume.ToString("F2"));
+            .Replace("{volume}", volume.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         return RunFireAndForgetAsync(cmd, ct);
     }
 
@@ -107,19 +111,29 @@ public sealed class JsonAudioBackend : IAudioBackend
         return _cli.RunAsync(parts.exe, parts.args, ct);
     }
 
-    private static IReadOnlyList<AudioDevice> ParseDevices(JsonArray items, AudioFieldMap fields)
+    private async Task<string> GetDefaultNameAsync(string command, CancellationToken ct)
+    {
+        if (string.IsNullOrEmpty(command)) return string.Empty;
+        var parts = SplitCommand(command);
+        var output = await _cli.RunAsync(parts.exe, parts.args, ct);
+        return output.Trim();
+    }
+
+    private static IReadOnlyList<AudioDevice> ParseDevices(JsonArray items, AudioFieldMap fields, string defaultName = "")
     {
         var result = new List<AudioDevice>(items.Count);
         foreach (var item in items)
         {
             if (item is not JsonObject obj) continue;
+            var name = GetString(obj, fields.Name);
             result.Add(new AudioDevice
             {
                 Id = GetInt(obj, fields.Id),
-                Name = GetString(obj, fields.Name),
+                Name = name,
                 Description = GetString(obj, fields.Description),
                 Volume = ParseVolumePercent(GetString(obj, fields.Volume)),
                 Muted = GetBool(obj, fields.Muted),
+                IsDefault = !string.IsNullOrEmpty(defaultName) && name == defaultName,
             });
         }
         return result;
@@ -144,8 +158,9 @@ public sealed class JsonAudioBackend : IAudioBackend
     }
 
     /// <summary>
-    /// Navigates a dot-notation path like "volume.front-left.value_percent" or
-    /// "properties.application.name" through a JsonObject.
+    /// Navigates a dot-notation path through a JsonObject.
+    /// Supports "*" wildcard to pick the first child property, e.g.
+    /// "volume.*.value_percent" works for both "front-left" and "mono" channels.
     /// </summary>
     private static JsonNode? Navigate(JsonObject root, string path)
     {
@@ -154,10 +169,22 @@ public sealed class JsonAudioBackend : IAudioBackend
         JsonNode? current = root;
         foreach (var segment in path.Split('.'))
         {
-            if (current is JsonObject obj && obj.TryGetPropertyValue(segment, out var next))
+            if (current is not JsonObject obj) return null;
+
+            if (segment == "*")
+            {
+                // Pick the first child property
+                using var enumerator = obj.GetEnumerator();
+                current = enumerator.MoveNext() ? enumerator.Current.Value : null;
+            }
+            else if (obj.TryGetPropertyValue(segment, out var next))
+            {
                 current = next;
+            }
             else
+            {
                 return null;
+            }
         }
         return current;
     }

@@ -92,12 +92,7 @@ public sealed class AudioViewModel : ViewModelBase
         }
     }
 
-    internal async Task OnChanged()
-    {
-        // Small delay to let the command take effect
-        await Task.Delay(200);
-        await RefreshAsync();
-    }
+    internal Task OnChanged() => RefreshAsync();
 }
 
 public sealed class SinkViewModel : ViewModelBase

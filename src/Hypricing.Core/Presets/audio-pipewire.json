@@ -9,7 +9,7 @@
         "id": "index",
         "name": "name",
         "description": "description",
-        "volume": "volume.front-left.value_percent",
+        "volume": "volume.*.value_percent",
         "muted": "mute"
       }
     },
@@ -20,7 +20,7 @@
         "id": "index",
         "name": "name",
         "description": "description",
-        "volume": "volume.front-left.value_percent",
+        "volume": "volume.*.value_percent",
         "muted": "mute"
       }
     },
@@ -31,7 +31,7 @@
         "id": "index",
         "appName": "properties.application.name",
         "sinkId": "sink",
-        "volume": "volume.front-left.value_percent",
+        "volume": "volume.*.value_percent",
         "muted": "mute"
       }
     },
@@ -39,6 +39,8 @@
     "toggleMute": "wpctl set-mute {id} toggle",
     "setDefaultSink": "wpctl set-default {id}",
     "setDefaultSource": "wpctl set-default {id}",
+    "getDefaultSink": "pactl get-default-sink",
+    "getDefaultSource": "pactl get-default-source",
     "moveStream": "pactl move-sink-input {streamId} {sinkId}",
     "setStreamVolume": "pactl set-sink-input-volume {streamId} {volume}"
   }

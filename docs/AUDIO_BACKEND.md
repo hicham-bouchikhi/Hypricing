@@ -84,7 +84,7 @@ Query commands (listing devices/streams) have this shape:
     "id": "index",
     "name": "name",
     "description": "description",
-    "volume": "volume.front-left.value_percent",
+    "volume": "volume.*.value_percent",
     "muted": "mute"
   }
 }
@@ -113,6 +113,19 @@ Paths walk into nested JSON objects. For example, given this `pactl` output:
 ```
 
 The path `volume.front-left.value_percent` resolves to `"74%"`.
+
+#### Wildcard `*`
+
+Some devices use different channel names (`front-left` for stereo, `mono` for
+mono microphones or Bluetooth). Use `*` to match the first child regardless of
+its key name:
+
+```
+volume.*.value_percent
+```
+
+This resolves to `"74%"` whether the channel is called `front-left`, `mono`, or
+anything else.
 
 Volume values can be either `"74%"` (percentage string) or `0.74` (decimal) — both
 are handled automatically.
@@ -143,6 +156,8 @@ Action commands are plain strings with placeholders:
   "toggleMute": "wpctl set-mute {id} toggle",
   "setDefaultSink": "wpctl set-default {id}",
   "setDefaultSource": "wpctl set-default {id}",
+  "getDefaultSink": "pactl get-default-sink",
+  "getDefaultSource": "pactl get-default-source",
   "moveStream": "pactl move-sink-input {streamId} {sinkId}",
   "setStreamVolume": "pactl set-sink-input-volume {streamId} {volume}"
 }
@@ -154,6 +169,10 @@ Action commands are plain strings with placeholders:
 | `{volume}` | Volume as decimal (e.g., `0.74`) |
 | `{streamId}` | Stream ID |
 | `{sinkId}` | Target sink ID |
+
+`getDefaultSink` and `getDefaultSource` are special — they take no placeholders and
+must return the **name** of the default device (matched against the `name` field from
+listing). This is how the "Default" badge is determined in the UI.
 
 ## Shipped presets
 
@@ -197,6 +216,45 @@ For systems using PulseAudio directly.
 
 4. Restart Hypricing. The status bar at the bottom of the Audio page shows which
    preset is active.
+
+## Tools that don't output JSON
+
+The preset format currently requires `"format": "json"` — query commands must return
+a JSON array. Both `pactl -f json` (PipeWire and PulseAudio) support this natively,
+which covers the vast majority of Linux desktops.
+
+If your audio tool outputs plain text (e.g., `amixer`, ALSA-only setups), you'll
+need a small wrapper script that converts the output to JSON. For example:
+
+```sh
+#!/bin/sh
+# amixer-sinks.sh — wraps amixer output into the JSON format Hypricing expects
+amixer scontrols | awk '
+  BEGIN { printf "[" }
+  # ... parse and emit JSON objects ...
+  END   { printf "]" }
+'
+```
+
+Then reference it in your preset:
+
+```json
+"listSinks": {
+  "run": "sh /path/to/amixer-sinks.sh",
+  "format": "json",
+  "fields": {
+    "id": "index",
+    "name": "name",
+    "description": "description",
+    "volume": "volume",
+    "muted": "muted"
+  }
+}
+```
+
+The wrapper script is responsible for producing a JSON array that matches the field
+paths you define. This keeps the backend generic — Hypricing never needs to know
+about the specifics of your audio tool.
 
 ## File locations
 
