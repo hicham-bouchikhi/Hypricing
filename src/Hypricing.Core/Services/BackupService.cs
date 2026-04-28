@@ -6,14 +6,9 @@ namespace Hypricing.Core.Services;
 /// Manages zip backups of Hyprland config files.
 /// Backups are stored in ~/.config/hypr/backups/.
 /// </summary>
-public class BackupService
+public class BackupService(string hyprConfigDir)
 {
-    private readonly string _backupDir;
-
-    public BackupService(string hyprConfigDir)
-    {
-        _backupDir = Path.Combine(hyprConfigDir, "backups");
-    }
+    private readonly string _backupDir = Path.Combine(hyprConfigDir, "backups");
 
     /// <summary>
     /// Lists all backup zip files, most recent first.

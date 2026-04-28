@@ -24,17 +24,12 @@ public static class HyprlangParser
 /// <summary>
 /// Recursive descent parser for Hyprlang configuration files.
 /// </summary>
-internal sealed class Parser
+internal sealed class Parser(string source)
 {
-    private readonly Lexer _lexer;
+    private readonly Lexer _lexer = new(source);
     private int _sectionDepth;
 
     private string Source => _lexer.Source;
-
-    public Parser(string source)
-    {
-        _lexer = new Lexer(source);
-    }
 
     public ConfigNode Parse()
     {

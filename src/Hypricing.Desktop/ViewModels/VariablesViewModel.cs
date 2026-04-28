@@ -7,11 +7,6 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class VariablesViewModel : ViewModelBase
 {
     private readonly HyprlandService _service;
-    private string? _statusMessage;
-    private string _newDeclName = string.Empty;
-    private string _newDeclValue = string.Empty;
-    private string _newEnvKey = string.Empty;
-    private string _newEnvValue = string.Empty;
 
     public VariablesViewModel(HyprlandService service)
     {
@@ -32,38 +27,66 @@ public sealed class VariablesViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
+        get;
         private set
         {
-            if (_statusMessage == value) return;
-            _statusMessage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public string NewDeclName
     {
-        get => _newDeclName;
-        set { if (_newDeclName != value) { _newDeclName = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public string NewDeclValue
     {
-        get => _newDeclValue;
-        set { if (_newDeclValue != value) { _newDeclValue = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public string NewEnvKey
     {
-        get => _newEnvKey;
-        set { if (_newEnvKey != value) { _newEnvKey = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public string NewEnvValue
     {
-        get => _newEnvValue;
-        set { if (_newEnvValue != value) { _newEnvValue = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public async Task LoadAsync()
     {

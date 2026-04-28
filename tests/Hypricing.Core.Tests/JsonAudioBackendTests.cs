@@ -220,18 +220,14 @@ public class JsonAudioBackendTests
     }
 
     /// <summary>CLI runner that returns a fixed response and records invocations.</summary>
-    private sealed class FakeCliRunner : CliRunner
+    private sealed class FakeCliRunner(string response) : CliRunner
     {
-        private readonly string _response;
-
-        public FakeCliRunner(string response) => _response = response;
-
         public List<(string Command, string Arguments)> Invocations { get; } = [];
 
         public override Task<string> RunAsync(string command, string arguments, CancellationToken ct = default)
         {
             Invocations.Add((command, arguments));
-            return Task.FromResult(_response);
+            return Task.FromResult(response);
         }
     }
 }

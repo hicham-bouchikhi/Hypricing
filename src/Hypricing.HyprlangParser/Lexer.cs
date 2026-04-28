@@ -7,30 +7,21 @@ namespace Hypricing.HyprlangParser;
 /// Provides low-level scanning utilities that the parser drives.
 /// Operates on the original string to enable Range-based references.
 /// </summary>
-internal sealed class Lexer
+internal sealed class Lexer(string source)
 {
-    private readonly string _source;
-    private int _pos;
+    public string Source => source;
+    public int Position { get; set; } = 0;
+    public bool IsAtEnd => Position >= source.Length;
 
-    public Lexer(string source)
-    {
-        _source = source;
-        _pos = 0;
-    }
+    public char Peek() => Position < source.Length ? source[Position] : '\0';
 
-    public string Source => _source;
-    public int Position { get => _pos; set => _pos = value; }
-    public bool IsAtEnd => _pos >= _source.Length;
-
-    public char Peek() => _pos < _source.Length ? _source[_pos] : '\0';
-
-    public void Advance() => _pos++;
+    public void Advance() => Position++;
 
     public bool TryConsume(char c)
     {
-        if (_pos < _source.Length && _source[_pos] == c)
+        if (Position < source.Length && source[Position] == c)
         {
-            _pos++;
+            Position++;
             return true;
         }
         return false;
@@ -39,30 +30,30 @@ internal sealed class Lexer
     /// <summary>Skip spaces and tabs (not newlines). Returns count of characters skipped.</summary>
     public int SkipWhitespace()
     {
-        int start = _pos;
-        while (_pos < _source.Length && _source[_pos] is ' ' or '\t')
-            _pos++;
-        return _pos - start;
+        int start = Position;
+        while (Position < source.Length && source[Position] is ' ' or '\t')
+            Position++;
+        return Position - start;
     }
 
     public bool IsAtNewLine()
     {
-        if (_pos >= _source.Length) return false;
-        return _source[_pos] == '\n' || (_source[_pos] == '\r' && _pos + 1 < _source.Length && _source[_pos + 1] == '\n');
+        if (Position >= source.Length) return false;
+        return source[Position] == '\n' || (source[Position] == '\r' && Position + 1 < source.Length && source[Position + 1] == '\n');
     }
 
     /// <summary>Consume a newline (\n or \r\n) if present. Returns characters consumed (0, 1, or 2).</summary>
     public int ConsumeNewLine()
     {
-        if (_pos >= _source.Length) return 0;
-        if (_source[_pos] == '\r' && _pos + 1 < _source.Length && _source[_pos + 1] == '\n')
+        if (Position >= source.Length) return 0;
+        if (source[Position] == '\r' && Position + 1 < source.Length && source[Position + 1] == '\n')
         {
-            _pos += 2;
+            Position += 2;
             return 2;
         }
-        if (_source[_pos] == '\n')
+        if (source[Position] == '\n')
         {
-            _pos++;
+            Position++;
             return 1;
         }
         return 0;
@@ -71,17 +62,17 @@ internal sealed class Lexer
     /// <summary>Read a run of identifier characters. Returns the range.</summary>
     public Range ReadIdentifier()
     {
-        int start = _pos;
-        while (_pos < _source.Length && IsIdentChar(_source[_pos]))
-            _pos++;
-        return start.._pos;
+        int start = Position;
+        while (Position < source.Length && IsIdentChar(source[Position]))
+            Position++;
+        return start..Position;
     }
 
     /// <summary>Advance to end of line (position at newline or EOF).</summary>
     public void SkipToEndOfLine()
     {
-        while (_pos < _source.Length && !IsNewLineChar(_pos))
-            _pos++;
+        while (Position < source.Length && !IsNewLineChar(Position))
+            Position++;
     }
 
     /// <summary>
@@ -92,7 +83,7 @@ internal sealed class Lexer
     /// <param name="stopAtBrace">If true, also treats '}' as a line terminator (for single-line sections).</param>
     public (string Value, string? InlineComment) ReadValue(bool stopAtBrace = false)
     {
-        int start = _pos;
+        int start = Position;
         int lineEnd = FindLineEnd(start, stopAtBrace);
 
         int? commentStart = null;
@@ -101,15 +92,15 @@ internal sealed class Lexer
         int i = start;
         while (i < lineEnd)
         {
-            if (_source[i] == '#')
+            if (source[i] == '#')
             {
-                if (i + 1 < lineEnd && _source[i + 1] == '#')
+                if (i + 1 < lineEnd && source[i + 1] == '#')
                 {
                     // ## escape → literal #
                     hasEscape = true;
                     i += 2;
                 }
-                else if (i == start || _source[i - 1] is ' ' or '\t')
+                else if (i == start || source[i - 1] is ' ' or '\t')
                 {
                     // # at value start (preceded by consumed whitespace) or after whitespace → inline comment
                     commentStart = i;
@@ -128,7 +119,7 @@ internal sealed class Lexer
         }
 
         int valueTextEnd = commentStart ?? lineEnd;
-        ReadOnlySpan<char> rawSpan = _source.AsSpan(start, valueTextEnd - start).TrimEnd();
+        ReadOnlySpan<char> rawSpan = source.AsSpan(start, valueTextEnd - start).TrimEnd();
         string value = hasEscape ? Unescape(rawSpan) : rawSpan.ToString();
 
         string? comment = null;
@@ -136,10 +127,10 @@ internal sealed class Lexer
         {
             // Comment extends to actual end of line (not stopped by brace)
             int commentEnd = FindLineEnd(commentStart.Value, stopAtBrace: false);
-            comment = _source.AsSpan(commentStart.Value, commentEnd - commentStart.Value).TrimEnd().ToString();
+            comment = source.AsSpan(commentStart.Value, commentEnd - commentStart.Value).TrimEnd().ToString();
         }
 
-        _pos = lineEnd;
+        Position = lineEnd;
         return (value, comment);
     }
 
@@ -181,10 +172,10 @@ internal sealed class Lexer
     private int FindLineEnd(int from, bool stopAtBrace = false)
     {
         int i = from;
-        while (i < _source.Length)
+        while (i < source.Length)
         {
             if (IsNewLineChar(i)) break;
-            if (stopAtBrace && _source[i] == '}') break;
+            if (stopAtBrace && source[i] == '}') break;
             i++;
         }
         return i;
@@ -192,9 +183,9 @@ internal sealed class Lexer
 
     private bool IsNewLineChar(int index)
     {
-        if (index >= _source.Length) return false;
-        if (_source[index] == '\n') return true;
-        if (_source[index] == '\r' && index + 1 < _source.Length && _source[index + 1] == '\n') return true;
+        if (index >= source.Length) return false;
+        if (source[index] == '\n') return true;
+        if (source[index] == '\r' && index + 1 < source.Length && source[index + 1] == '\n') return true;
         return false;
     }
 

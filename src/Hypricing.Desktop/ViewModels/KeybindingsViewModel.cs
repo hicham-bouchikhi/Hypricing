@@ -7,12 +7,6 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class KeybindingsViewModel : ViewModelBase
 {
     private readonly HyprlandService _service;
-    private string? _statusMessage;
-    private string _newVariant = "bind";
-    private string _newModifiers = string.Empty;
-    private string _newKey = string.Empty;
-    private string _newDispatcher = string.Empty;
-    private string _newArgs = string.Empty;
 
     public KeybindingsViewModel(HyprlandService service)
     {
@@ -28,44 +22,79 @@ public sealed class KeybindingsViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
+        get;
         private set
         {
-            if (_statusMessage == value) return;
-            _statusMessage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public string NewVariant
     {
-        get => _newVariant;
-        set { if (_newVariant != value) { _newVariant = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "bind";
 
     public string NewModifiers
     {
-        get => _newModifiers;
-        set { if (_newModifiers != value) { _newModifiers = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public string NewKey
     {
-        get => _newKey;
-        set { if (_newKey != value) { _newKey = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public string NewDispatcher
     {
-        get => _newDispatcher;
-        set { if (_newDispatcher != value) { _newDispatcher = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public string NewArgs
     {
-        get => _newArgs;
-        set { if (_newArgs != value) { _newArgs = value; OnPropertyChanged(); } }
-    }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = string.Empty;
 
     public void Refresh()
     {

@@ -33,9 +33,10 @@ Hypricing/
 │         Hypricing.Desktop           │  Avalonia UI — Views + ViewModels
 ├─────────────────────────────────────┤
 │          Hypricing.Core             │  Business logic — Services + Models
-├─────────────────────────────────────┤
-│      Hypricing.HyprlangParser       │  Pure parser — text → AST → text
-└─────────────────────────────────────┘
+├──────────────────┬──────────────────┤
+│ HyprlangParser   │   LuaParser      │  Pure parsers — text → AST → text
+│ (< 0.55)         │   (>= 0.55)      │
+└──────────────────┴──────────────────┘
 ```
 
 Dependencies flow **downward only**. `Desktop` depends on `Core`. `Core` depends on

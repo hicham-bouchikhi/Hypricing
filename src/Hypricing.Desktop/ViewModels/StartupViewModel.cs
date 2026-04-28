@@ -8,9 +8,6 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class StartupViewModel : ViewModelBase
 {
     private readonly HyprlandService _service;
-    private string? _statusMessage;
-    private string _newCommand = string.Empty;
-    private ExecVariant _newVariant = ExecVariant.Once;
 
     public StartupViewModel(HyprlandService service)
     {
@@ -26,36 +23,36 @@ public sealed class StartupViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
+        get;
         private set
         {
-            if (_statusMessage == value) return;
-            _statusMessage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public string NewCommand
     {
-        get => _newCommand;
+        get;
         set
         {
-            if (_newCommand == value) return;
-            _newCommand = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     public ExecVariant NewVariant
     {
-        get => _newVariant;
+        get;
         set
         {
-            if (_newVariant == value) return;
-            _newVariant = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = ExecVariant.Once;
 
     public void Refresh()
     {

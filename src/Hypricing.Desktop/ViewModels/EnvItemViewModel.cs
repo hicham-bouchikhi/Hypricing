@@ -9,13 +9,12 @@ namespace Hypricing.Desktop.ViewModels;
 /// </summary>
 public sealed class EnvItemViewModel : ViewModelBase
 {
-    private readonly KeywordNode _node;
     private string _name;
     private string _value;
 
     public EnvItemViewModel(KeywordNode node, Action<EnvItemViewModel>? onRemove = null)
     {
-        _node = node;
+        Node = node;
         RemoveCommand = new RelayCommand(() => onRemove?.Invoke(this));
         var commaIndex = node.Params.IndexOf(',');
         if (commaIndex >= 0)
@@ -30,7 +29,8 @@ public sealed class EnvItemViewModel : ViewModelBase
         }
     }
 
-    internal KeywordNode Node => _node;
+    internal KeywordNode Node { get; }
+
     public ICommand RemoveCommand { get; }
 
     public string Name
@@ -57,5 +57,5 @@ public sealed class EnvItemViewModel : ViewModelBase
         }
     }
 
-    private void SyncToNode() => _node.Params = $"{_name},{_value}";
+    private void SyncToNode() => Node.Params = $"{_name},{_value}";
 }

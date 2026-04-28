@@ -1,5 +1,8 @@
 # Hypricing — HyprlangParser Design Document
 
+> **Scope:** This document covers `Hypricing.HyprlangParser` which targets **Hyprland < 0.55**
+> (Hyprlang `.conf` syntax). For Hyprland ≥ 0.55 (Lua), see [LUA_MIGRATION.md](LUA_MIGRATION.md).
+
 ## Overview
 
 The `HyprlangParser` is the foundation of Hypricing. It is a standalone .NET 10 library

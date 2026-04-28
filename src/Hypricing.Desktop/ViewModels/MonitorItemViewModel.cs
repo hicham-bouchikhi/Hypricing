@@ -12,7 +12,6 @@ namespace Hypricing.Desktop.ViewModels;
 /// </summary>
 public sealed partial class MonitorItemViewModel : ViewModelBase
 {
-    private readonly KeywordNode _node;
     private string _name = string.Empty;
     private int _width;
     private int _height;
@@ -20,22 +19,22 @@ public sealed partial class MonitorItemViewModel : ViewModelBase
     private int _x;
     private int _y;
     private double _scale = 1;
-    private bool _isSelected;
+    private IReadOnlyList<string> _availableModes = [];
 
     // Canvas-relative properties (set by the layout logic)
-    private double _canvasX;
-    private double _canvasY;
-    private double _canvasWidth;
-    private double _canvasHeight;
 
     public MonitorItemViewModel(KeywordNode node, Action<MonitorItemViewModel>? onRemove = null)
     {
-        _node = node;
+        Node = node;
         RemoveCommand = new RelayCommand(() => onRemove?.Invoke(this));
         Parse(node.Params);
+        // Provide a single-item fallback so the ComboBox is never empty before
+        // live modes are loaded from hyprctl.
+        _availableModes = [Resolution];
     }
 
-    internal KeywordNode Node => _node;
+    internal KeywordNode Node { get; }
+
     public ICommand RemoveCommand { get; }
 
     public string Name
@@ -82,36 +81,132 @@ public sealed partial class MonitorItemViewModel : ViewModelBase
 
     public bool IsSelected
     {
-        get => _isSelected;
-        set { if (_isSelected != value) { _isSelected = value; OnPropertyChanged(); } }
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public double CanvasX
     {
-        get => _canvasX;
-        set { if (Math.Abs(_canvasX - value) > 0.1) { _canvasX = value; OnPropertyChanged(); } }
+        get;
+        set
+        {
+            if (Math.Abs(field - value) > 0.1)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public double CanvasY
     {
-        get => _canvasY;
-        set { if (Math.Abs(_canvasY - value) > 0.1) { _canvasY = value; OnPropertyChanged(); } }
+        get;
+        set
+        {
+            if (Math.Abs(field - value) > 0.1)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public double CanvasWidth
     {
-        get => _canvasWidth;
-        set { if (Math.Abs(_canvasWidth - value) > 0.1) { _canvasWidth = value; OnPropertyChanged(); } }
+        get;
+        set
+        {
+            if (Math.Abs(field - value) > 0.1)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public double CanvasHeight
     {
-        get => _canvasHeight;
-        set { if (Math.Abs(_canvasHeight - value) > 0.1) { _canvasHeight = value; OnPropertyChanged(); } }
+        get;
+        set
+        {
+            if (Math.Abs(field - value) > 0.1)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public string Resolution => $"{_width}x{_height}@{_refreshRate.ToString(CultureInfo.InvariantCulture)}";
     public string Position => $"{_x}x{_y}";
+
+    /// <summary>
+    /// Available resolution modes from <c>hyprctl monitors -j</c>.
+    /// Populated after a live hyprctl query; falls back to [Resolution] when unavailable.
+    /// </summary>
+    public IReadOnlyList<string> AvailableModes
+    {
+        get => _availableModes;
+        set
+        {
+            _availableModes = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SelectedMode));
+        }
+    }
+
+    /// <summary>
+    /// The currently selected mode string (matches an entry in <see cref="AvailableModes"/>).
+    /// Setting this parses the mode string and updates Width, Height and RefreshRate.
+    /// </summary>
+    public string? SelectedMode
+    {
+        get
+        {
+            // Find the mode in AvailableModes that matches the current resolution numerically.
+            foreach (var mode in _availableModes)
+            {
+                var stripped = mode.EndsWith("Hz", StringComparison.OrdinalIgnoreCase)
+                    ? mode[..^2] : mode;
+                var m = ResolutionRegex().Match(stripped.Trim());
+                if (!m.Success) continue;
+                var w = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
+                var h = int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture);
+                var hz = m.Groups[3].Success
+                    ? double.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture) : 60;
+                if (w == _width && h == _height && Math.Abs(hz - _refreshRate) < 0.5)
+                    return mode;
+            }
+            // Fallback: return the raw resolution string so the ComboBox isn't blank.
+            return _availableModes.Count > 0 ? null : Resolution;
+        }
+        set
+        {
+            if (value is null) return;
+            // Strip trailing "Hz" if present: "1920x1080@144.00Hz" → "1920x1080@144.00"
+            var stripped = value.EndsWith("Hz", StringComparison.OrdinalIgnoreCase)
+                ? value[..^2] : value;
+            var m = ResolutionRegex().Match(stripped.Trim());
+            if (!m.Success) return;
+            _width = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
+            _height = int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture);
+            _refreshRate = m.Groups[3].Success
+                ? double.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture) : 60;
+            OnPropertyChanged(nameof(Width));
+            OnPropertyChanged(nameof(Height));
+            OnPropertyChanged(nameof(RefreshRate));
+            OnPropertyChanged(nameof(Resolution));
+            OnPropertyChanged();
+            SyncToNode();
+        }
+    }
 
     private void Parse(string @params)
     {
@@ -154,7 +249,7 @@ public sealed partial class MonitorItemViewModel : ViewModelBase
 
     private void SyncToNode()
     {
-        _node.Params = $"{_name},{_width}x{_height}@{_refreshRate.ToString(CultureInfo.InvariantCulture)},{_x}x{_y},{_scale.ToString(CultureInfo.InvariantCulture)}";
+        Node.Params = $"{_name},{_width}x{_height}@{_refreshRate.ToString(CultureInfo.InvariantCulture)},{_x}x{_y},{_scale.ToString(CultureInfo.InvariantCulture)}";
     }
 
     [GeneratedRegex(@"^(\d+)x(\d+)(?:@(\d+(?:\.\d+)?))?$")]

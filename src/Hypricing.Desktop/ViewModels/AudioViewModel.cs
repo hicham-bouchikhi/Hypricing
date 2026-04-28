@@ -8,8 +8,6 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class AudioViewModel : ViewModelBase
 {
     private readonly AudioService _audioService;
-    private string? _statusMessage;
-    private SinkViewModel? _selectedSink;
 
     public AudioViewModel(AudioService audioService)
     {
@@ -25,22 +23,22 @@ public sealed class AudioViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
+        get;
         private set
         {
-            if (_statusMessage == value) return;
-            _statusMessage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public SinkViewModel? SelectedSink
     {
-        get => _selectedSink;
+        get;
         set
         {
-            if (_selectedSink == value) return;
-            _selectedSink = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }

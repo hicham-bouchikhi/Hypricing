@@ -5,15 +5,11 @@ namespace Hypricing.Desktop.ViewModels;
 /// <summary>
 /// Minimal synchronous ICommand implementation.
 /// </summary>
-internal sealed class RelayCommand : ICommand
+internal sealed class RelayCommand(Action execute) : ICommand
 {
-    private readonly Action _execute;
-
-    public RelayCommand(Action execute) => _execute = execute;
-
     public bool CanExecute(object? parameter) => true;
 
-    public void Execute(object? parameter) => _execute();
+    public void Execute(object? parameter) => execute();
 
     public event EventHandler? CanExecuteChanged { add { } remove { } }
 }
@@ -21,12 +17,9 @@ internal sealed class RelayCommand : ICommand
 /// <summary>
 /// Minimal async ICommand implementation. No external dependency needed.
 /// </summary>
-internal sealed class AsyncRelayCommand : ICommand
+internal sealed class AsyncRelayCommand(Func<Task> execute) : ICommand
 {
-    private readonly Func<Task> _execute;
     private bool _isExecuting;
-
-    public AsyncRelayCommand(Func<Task> execute) => _execute = execute;
 
     public bool CanExecute(object? parameter) => !_isExecuting;
 
@@ -37,7 +30,7 @@ internal sealed class AsyncRelayCommand : ICommand
         CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         try
         {
-            await _execute();
+            await execute();
         }
         catch
         {

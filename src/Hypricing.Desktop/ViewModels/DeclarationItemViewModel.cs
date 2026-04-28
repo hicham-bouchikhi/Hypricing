@@ -9,35 +9,34 @@ namespace Hypricing.Desktop.ViewModels;
 /// </summary>
 public sealed class DeclarationItemViewModel : ViewModelBase
 {
-    private readonly DeclarationNode _node;
-
     public DeclarationItemViewModel(DeclarationNode node, Action<DeclarationItemViewModel>? onRemove = null)
     {
-        _node = node;
+        Node = node;
         RemoveCommand = new RelayCommand(() => onRemove?.Invoke(this));
     }
 
-    internal DeclarationNode Node => _node;
+    internal DeclarationNode Node { get; }
+
     public ICommand RemoveCommand { get; }
 
     public string Name
     {
-        get => _node.Name;
+        get => Node.Name;
         set
         {
-            if (_node.Name == value) return;
-            _node.Name = value;
+            if (Node.Name == value) return;
+            Node.Name = value;
             OnPropertyChanged();
         }
     }
 
     public string Value
     {
-        get => _node.Value;
+        get => Node.Value;
         set
         {
-            if (_node.Value == value) return;
-            _node.Value = value;
+            if (Node.Value == value) return;
+            Node.Value = value;
             OnPropertyChanged();
         }
     }

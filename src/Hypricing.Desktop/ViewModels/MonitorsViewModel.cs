@@ -7,8 +7,6 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class MonitorsViewModel : ViewModelBase
 {
     private readonly HyprlandService _service;
-    private string? _statusMessage;
-    private MonitorItemViewModel? _selectedMonitor;
     private double _canvasWidth = 600;
     private double _canvasHeight = 300;
 
@@ -26,26 +24,26 @@ public sealed class MonitorsViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
+        get;
         private set
         {
-            if (_statusMessage == value) return;
-            _statusMessage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public MonitorItemViewModel? SelectedMonitor
     {
-        get => _selectedMonitor;
+        get;
         set
         {
-            if (_selectedMonitor == value) return;
-            if (_selectedMonitor is not null)
-                _selectedMonitor.IsSelected = false;
-            _selectedMonitor = value;
-            if (_selectedMonitor is not null)
-                _selectedMonitor.IsSelected = true;
+            if (field == value) return;
+            if (field is not null)
+                field.IsSelected = false;
+            field = value;
+            if (field is not null)
+                field.IsSelected = true;
             OnPropertyChanged();
         }
     }
@@ -87,6 +85,32 @@ public sealed class MonitorsViewModel : ViewModelBase
             SelectedMonitor = Monitors[0];
 
         RecalculateLayout();
+
+        // Fire-and-forget: populate available modes from live hyprctl data.
+        // Failures are swallowed gracefully (e.g. no Hyprland session in tests).
+        _ = LoadModesAsync();
+    }
+
+    /// <summary>
+    /// Queries <c>hyprctl monitors -j</c> and populates <see cref="MonitorItemViewModel.AvailableModes"/>
+    /// for each monitor. Runs asynchronously after <see cref="Refresh"/> so the UI is never blocked.
+    /// </summary>
+    private async Task LoadModesAsync()
+    {
+        try
+        {
+            var infos = await _service.GetMonitorInfoAsync();
+            foreach (var vm in Monitors)
+            {
+                var info = infos.FirstOrDefault(i => i.Name == vm.Name);
+                if (info is not null && info.AvailableModes.Count > 0)
+                    vm.AvailableModes = info.AvailableModes;
+            }
+        }
+        catch
+        {
+            // hyprctl unavailable (tests, no running Wayland session) — keep fallback values.
+        }
     }
 
     /// <summary>

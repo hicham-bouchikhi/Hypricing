@@ -7,7 +7,6 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class BackupViewModel : ViewModelBase
 {
     private readonly HyprlandService _service;
-    private string? _statusMessage;
 
     public BackupViewModel(HyprlandService service)
     {
@@ -21,11 +20,11 @@ public sealed class BackupViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
+        get;
         private set
         {
-            if (_statusMessage == value) return;
-            _statusMessage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
         }
     }

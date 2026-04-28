@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Hypricing.Core.Infrastructure;
+using Hypricing.Core.Models;
 using Hypricing.HyprlangParser;
 using Hypricing.HyprlangParser.Nodes;
 
@@ -8,16 +10,10 @@ namespace Hypricing.Core.Services;
 /// Owns the hyprland.conf lifecycle: load, modify, save, reload.
 /// Follows <c>source =</c> includes to load the full configuration.
 /// </summary>
-public class HyprlandService
+public class HyprlandService(CliRunner cli)
 {
-    private readonly CliRunner _cli;
     private readonly List<LoadedConfig> _configs = [];
     private BackupService? _backup;
-
-    public HyprlandService(CliRunner cli)
-    {
-        _cli = cli;
-    }
 
     /// <summary>The backup service, available after loading.</summary>
     public BackupService Backup => _backup
@@ -167,6 +163,27 @@ public class HyprlandService
     }
 
     /// <summary>
+    /// Queries <c>hyprctl monitors -j</c> and returns live monitor info
+    /// (including all supported modes) for each connected display.
+    /// </summary>
+    public async Task<IReadOnlyList<MonitorInfo>> GetMonitorInfoAsync(CancellationToken ct = default)
+    {
+        var json = await cli.RunAsync("hyprctl", "monitors -j", ct);
+        if (string.IsNullOrWhiteSpace(json))
+            return [];
+
+        var items = JsonSerializer.Deserialize(json,
+            HyprctlMonitorJsonContext.Default.ListHyprctlMonitorJson);
+
+        if (items is null)
+            return [];
+
+        return items
+            .Select(m => new MonitorInfo(m.Name, m.AvailableModes))
+            .ToList();
+    }
+
+    /// <summary>
     /// Removes a monitor entry from whichever config file contains it.
     /// </summary>
     public void RemoveMonitor(KeywordNode node)
@@ -229,7 +246,7 @@ public class HyprlandService
             _configs[i] = new LoadedConfig(loaded.FilePath, HyprlangParser.HyprlangParser.Parse(text));
         }
 
-        await _cli.RunAsync("hyprctl", "reload", ct);
+        await cli.RunAsync("hyprctl", "reload", ct);
     }
 
     private async Task LoadRecursiveAsync(string path, HashSet<string> visited, CancellationToken ct)

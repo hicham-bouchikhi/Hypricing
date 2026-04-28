@@ -42,8 +42,6 @@ public sealed class InputViewModel : ViewModelBase
     private bool _dragLock;
     private bool _clickfingerBehavior;
 
-    private string? _statusMessage;
-
     public InputViewModel(HyprlandService service)
     {
         _service = service;
@@ -57,8 +55,12 @@ public sealed class InputViewModel : ViewModelBase
 
     public string? StatusMessage
     {
-        get => _statusMessage;
-        set { _statusMessage = value; OnPropertyChanged(); }
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
     }
 
     // --- Keyboard ---

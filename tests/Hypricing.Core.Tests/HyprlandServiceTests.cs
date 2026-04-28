@@ -399,4 +399,74 @@ public class HyprlandServiceTests : IDisposable
             return Task.FromResult(string.Empty);
         }
     }
+
+    /// <summary>CliRunner that returns a canned response for hyprctl monitors -j.</summary>
+    private sealed class HyprctlStubCliRunner(string monitorsJson) : CliRunner
+    {
+        public override Task<string> RunAsync(string command, string arguments, CancellationToken ct = default)
+        {
+            if (command == "hyprctl" && arguments == "monitors -j")
+                return Task.FromResult(monitorsJson);
+            // Other calls (e.g. hyprctl reload) return empty
+            return Task.FromResult(string.Empty);
+        }
+    }
+
+    [Fact]
+    public async Task GetMonitorInfoAsync_ParsesNamesAndModes()
+    {
+        const string json = """
+            [
+              {
+                "name": "DP-1",
+                "availableModes": ["1920x1080@144.00Hz", "1920x1080@60.00Hz", "2560x1440@144.00Hz"]
+              },
+              {
+                "name": "HDMI-A-1",
+                "availableModes": ["1920x1080@60.00Hz"]
+              }
+            ]
+            """;
+
+        var path = WriteTempConfig("monitor = DP-1,1920x1080@144,0x0,1\n");
+        var service = new HyprlandService(new HyprctlStubCliRunner(json));
+        await service.LoadAsync(path);
+
+        var infos = await service.GetMonitorInfoAsync();
+
+        Assert.Equal(2, infos.Count);
+
+        Assert.Equal("DP-1", infos[0].Name);
+        Assert.Equal(3, infos[0].AvailableModes.Count);
+        Assert.Contains("1920x1080@144.00Hz", infos[0].AvailableModes);
+        Assert.Contains("2560x1440@144.00Hz", infos[0].AvailableModes);
+
+        Assert.Equal("HDMI-A-1", infos[1].Name);
+        Assert.Single(infos[1].AvailableModes);
+        Assert.Equal("1920x1080@60.00Hz", infos[1].AvailableModes[0]);
+    }
+
+    [Fact]
+    public async Task GetMonitorInfoAsync_ReturnsEmptyOnEmptyJson()
+    {
+        var path = WriteTempConfig("$var = value\n");
+        var service = new HyprlandService(new HyprctlStubCliRunner(""));
+        await service.LoadAsync(path);
+
+        var infos = await service.GetMonitorInfoAsync();
+
+        Assert.Empty(infos);
+    }
+
+    [Fact]
+    public async Task GetMonitorInfoAsync_ReturnsEmptyOnEmptyArray()
+    {
+        var path = WriteTempConfig("$var = value\n");
+        var service = new HyprlandService(new HyprctlStubCliRunner("[]"));
+        await service.LoadAsync(path);
+
+        var infos = await service.GetMonitorInfoAsync();
+
+        Assert.Empty(infos);
+    }
 }

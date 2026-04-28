@@ -9,24 +9,23 @@ namespace Hypricing.Desktop.ViewModels;
 /// </summary>
 public sealed class BindItemViewModel : ViewModelBase
 {
-    private readonly KeywordNode _node;
-
     public BindItemViewModel(KeywordNode node, Action<BindItemViewModel>? onRemove = null)
     {
-        _node = node;
+        Node = node;
         RemoveCommand = new RelayCommand(() => onRemove?.Invoke(this));
     }
 
-    internal KeywordNode Node => _node;
+    internal KeywordNode Node { get; }
+
     public ICommand RemoveCommand { get; }
 
     public string Variant
     {
-        get => _node.Keyword;
+        get => Node.Keyword;
         set
         {
-            if (_node.Keyword == value) return;
-            _node.Keyword = value;
+            if (Node.Keyword == value) return;
+            Node.Keyword = value;
             OnPropertyChanged();
         }
     }
@@ -53,12 +52,12 @@ public sealed class BindItemViewModel : ViewModelBase
     {
         get
         {
-            var parts = _node.Params.Split(',', 4);
+            var parts = Node.Params.Split(',', 4);
             return parts.Length > 3 ? parts[3] : string.Empty;
         }
         set
         {
-            var parts = _node.Params.Split(',', 4);
+            var parts = Node.Params.Split(',', 4);
             while (parts.Length < 4)
                 parts = [.. parts, ""];
             parts[3] = value;
@@ -79,13 +78,13 @@ public sealed class BindItemViewModel : ViewModelBase
 
     private string GetPart(int index)
     {
-        var parts = _node.Params.Split(',', 4);
+        var parts = Node.Params.Split(',', 4);
         return index < parts.Length ? parts[index] : string.Empty;
     }
 
     private void SetPart(int index, string value)
     {
-        var parts = _node.Params.Split(',', 4);
+        var parts = Node.Params.Split(',', 4);
         while (parts.Length <= index)
             parts = [.. parts, ""];
         parts[index] = value;
@@ -99,6 +98,6 @@ public sealed class BindItemViewModel : ViewModelBase
         int last = parts.Length - 1;
         while (last > 2 && string.IsNullOrEmpty(parts[last]))
             last--;
-        _node.Params = string.Join(',', parts[..(last + 1)]);
+        Node.Params = string.Join(',', parts[..(last + 1)]);
     }
 }

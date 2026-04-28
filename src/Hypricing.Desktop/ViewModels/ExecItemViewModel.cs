@@ -8,26 +8,26 @@ namespace Hypricing.Desktop.ViewModels;
 /// </summary>
 public sealed class ExecItemViewModel : ViewModelBase
 {
-    private readonly ExecNode _node;
     private readonly Action<ExecItemViewModel>? _onRemove;
 
     public ExecItemViewModel(ExecNode node, Action<ExecItemViewModel>? onRemove = null)
     {
-        _node = node;
+        Node = node;
         _onRemove = onRemove;
         RemoveCommand = new RelayCommand(() => _onRemove?.Invoke(this));
     }
 
-    internal ExecNode Node => _node;
+    internal ExecNode Node { get; }
+
     public ICommand RemoveCommand { get; }
 
     public ExecVariant Variant
     {
-        get => _node.Variant;
+        get => Node.Variant;
         set
         {
-            if (_node.Variant == value) return;
-            _node.Variant = value;
+            if (Node.Variant == value) return;
+            Node.Variant = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(VariantDisplay));
         }
@@ -35,27 +35,27 @@ public sealed class ExecItemViewModel : ViewModelBase
 
     public string Command
     {
-        get => _node.Command;
+        get => Node.Command;
         set
         {
-            if (_node.Command == value) return;
-            _node.Command = value;
+            if (Node.Command == value) return;
+            Node.Command = value;
             OnPropertyChanged();
         }
     }
 
     public string? Rules
     {
-        get => _node.Rules;
+        get => Node.Rules;
         set
         {
-            if (_node.Rules == value) return;
-            _node.Rules = value;
+            if (Node.Rules == value) return;
+            Node.Rules = value;
             OnPropertyChanged();
         }
     }
 
-    public string VariantDisplay => ExecNode.VariantToKeyword(_node.Variant);
+    public string VariantDisplay => ExecNode.VariantToKeyword(Node.Variant);
 
     public static IReadOnlyList<ExecVariant> AllVariants { get; } =
     [

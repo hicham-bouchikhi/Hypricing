@@ -10,40 +10,32 @@ namespace Hypricing.Core.Backends.Audio;
 /// Generic audio backend driven entirely by a JSON preset.
 /// Runs shell commands, parses JSON output using field mappings.
 /// </summary>
-public sealed class JsonAudioBackend : IAudioBackend
+public sealed class JsonAudioBackend(CliRunner cli, AudioPreset preset) : IAudioBackend
 {
-    private readonly CliRunner _cli;
-    private readonly AudioPreset _preset;
-
-    public JsonAudioBackend(CliRunner cli, AudioPreset preset)
-    {
-        _cli = cli;
-        _preset = preset;
-    }
-
-    public string PresetName => _preset.Name;
+    public string PresetName => preset.Name;
 
     public async Task<IReadOnlyList<AudioDevice>> ListSinksAsync(CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.ListSinks;
+        var cmd = preset.Commands.ListSinks;
         var json = await RunJsonCommandAsync(cmd.Run, ct);
-        var defaultName = await GetDefaultNameAsync(_preset.Commands.GetDefaultSink, ct);
-        return ParseDevices(json, cmd.Fields, defaultName);
+        var defaultName = await GetDefaultNameAsync(preset.Commands.GetDefaultSink, ct);
+        var devices = ParseDevices(json, cmd.Fields, defaultName);
+        return await ResolveBluetoothNamesAsync(devices, ct);
     }
 
     public async Task<IReadOnlyList<AudioDevice>> ListSourcesAsync(CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.ListSources;
+        var cmd = preset.Commands.ListSources;
         var json = await RunJsonCommandAsync(cmd.Run, ct);
-        var defaultName = await GetDefaultNameAsync(_preset.Commands.GetDefaultSource, ct);
+        var defaultName = await GetDefaultNameAsync(preset.Commands.GetDefaultSource, ct);
         var devices = ParseDevices(json, cmd.Fields, defaultName);
-        // Filter out monitor sources (loopback captures of output devices)
-        return devices.Where(d => !d.Name.Contains(".monitor")).ToList();
+        devices = devices.Where(d => !d.Name.Contains(".monitor")).ToList();
+        return await ResolveBluetoothNamesAsync(devices, ct);
     }
 
     public async Task<IReadOnlyList<AudioStream>> ListStreamsAsync(CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.ListStreams;
+        var cmd = preset.Commands.ListStreams;
         var json = await RunJsonCommandAsync(cmd.Run, ct);
         return ParseStreams(json, cmd.Fields);
     }
@@ -51,7 +43,7 @@ public sealed class JsonAudioBackend : IAudioBackend
     public Task SetVolumeAsync(int deviceId, double volume, CancellationToken ct = default)
     {
         var pct = (int)Math.Round(volume * 100);
-        var cmd = _preset.Commands.SetVolume
+        var cmd = preset.Commands.SetVolume
             .Replace("{id}", deviceId.ToString())
             .Replace("{volumePct}", pct + "%")
             .Replace("{volume}", volume.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
@@ -60,14 +52,14 @@ public sealed class JsonAudioBackend : IAudioBackend
 
     public Task ToggleMuteAsync(int deviceId, CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.ToggleMute
+        var cmd = preset.Commands.ToggleMute
             .Replace("{id}", deviceId.ToString());
         return RunFireAndForgetAsync(cmd, ct);
     }
 
     public Task SetDefaultSinkAsync(int deviceId, string deviceName, CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.SetDefaultSink
+        var cmd = preset.Commands.SetDefaultSink
             .Replace("{id}", deviceId.ToString())
             .Replace("{name}", deviceName);
         return RunFireAndForgetAsync(cmd, ct);
@@ -75,7 +67,7 @@ public sealed class JsonAudioBackend : IAudioBackend
 
     public Task SetDefaultSourceAsync(int deviceId, string deviceName, CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.SetDefaultSource
+        var cmd = preset.Commands.SetDefaultSource
             .Replace("{id}", deviceId.ToString())
             .Replace("{name}", deviceName);
         return RunFireAndForgetAsync(cmd, ct);
@@ -83,7 +75,7 @@ public sealed class JsonAudioBackend : IAudioBackend
 
     public Task MoveStreamAsync(int streamId, int sinkId, CancellationToken ct = default)
     {
-        var cmd = _preset.Commands.MoveStream
+        var cmd = preset.Commands.MoveStream
             .Replace("{streamId}", streamId.ToString())
             .Replace("{sinkId}", sinkId.ToString());
         return RunFireAndForgetAsync(cmd, ct);
@@ -92,17 +84,77 @@ public sealed class JsonAudioBackend : IAudioBackend
     public Task SetStreamVolumeAsync(int streamId, double volume, CancellationToken ct = default)
     {
         var pct = (int)Math.Round(volume * 100);
-        var cmd = _preset.Commands.SetStreamVolume
+        var cmd = preset.Commands.SetStreamVolume
             .Replace("{streamId}", streamId.ToString())
             .Replace("{volumePct}", pct + "%")
             .Replace("{volume}", volume.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         return RunFireAndForgetAsync(cmd, ct);
     }
 
+    private async Task<IReadOnlyList<AudioDevice>> ResolveBluetoothNamesAsync(
+        IReadOnlyList<AudioDevice> devices, CancellationToken ct)
+    {
+        var needsResolution = devices.Any(d =>
+            d.Description is "(null)" or "" && d.Name.StartsWith("bluez_", StringComparison.Ordinal));
+
+        if (!needsResolution) return devices;
+
+        var result = new List<AudioDevice>(devices.Count);
+        foreach (var device in devices)
+        {
+            if (device.Description is "(null)" or "" &&
+                device.Name.StartsWith("bluez_", StringComparison.Ordinal))
+            {
+                var alias = await GetBluetoothAliasAsync(device.Name, ct);
+                if (!string.IsNullOrEmpty(alias))
+                {
+                    result.Add(new AudioDevice
+                    {
+                        Id = device.Id,
+                        Name = device.Name,
+                        Description = alias,
+                        Volume = device.Volume,
+                        Muted = device.Muted,
+                        IsDefault = device.IsDefault,
+                    });
+                    continue;
+                }
+            }
+            result.Add(device);
+        }
+        return result;
+    }
+
+    private async Task<string> GetBluetoothAliasAsync(string deviceName, CancellationToken ct)
+    {
+        // Extract MAC from "bluez_output.34_0E_22_E3_71_FE.1" → "34:0E:22:E3:71:FE"
+        var parts = deviceName.Split('.');
+        if (parts.Length < 2) return string.Empty;
+        var mac = parts[1].Replace('_', ':');
+
+        try
+        {
+            var output = await cli.RunAsync("bluetoothctl", $"info {mac}", ct);
+            foreach (var line in output.Split('\n'))
+            {
+                var trimmed = line.AsSpan().Trim();
+                if (trimmed.StartsWith("Alias:"))
+                    return trimmed["Alias:".Length..].Trim().ToString();
+                if (trimmed.StartsWith("Name:"))
+                    return trimmed["Name:".Length..].Trim().ToString();
+            }
+        }
+        catch
+        {
+            // bluetoothctl not available
+        }
+        return string.Empty;
+    }
+
     private async Task<JsonArray> RunJsonCommandAsync(string command, CancellationToken ct = default)
     {
         var parts = SplitCommand(command);
-        var output = await _cli.RunAsync(parts.exe, parts.args, ct);
+        var output = await cli.RunAsync(parts.exe, parts.args, ct);
 
         if (string.IsNullOrWhiteSpace(output))
             return [];
@@ -114,14 +166,14 @@ public sealed class JsonAudioBackend : IAudioBackend
     private Task RunFireAndForgetAsync(string command, CancellationToken ct = default)
     {
         var parts = SplitCommand(command);
-        return _cli.RunAsync(parts.exe, parts.args, ct);
+        return cli.RunAsync(parts.exe, parts.args, ct);
     }
 
     private async Task<string> GetDefaultNameAsync(string command, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(command)) return string.Empty;
         var parts = SplitCommand(command);
-        var output = await _cli.RunAsync(parts.exe, parts.args, ct);
+        var output = await cli.RunAsync(parts.exe, parts.args, ct);
         return output.Trim();
     }
 

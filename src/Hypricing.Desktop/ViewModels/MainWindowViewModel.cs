@@ -53,15 +53,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private PageItem? _selectedPage;
-
     public PageItem? SelectedPage
     {
-        get => _selectedPage;
+        get;
         set
         {
-            if (_selectedPage == value) return;
-            _selectedPage = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
             if (value?.ViewModel is not null)
                 CurrentPage = value.ViewModel;
@@ -69,14 +67,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 }
 
-public sealed class PageItem
+public sealed class PageItem(string name, ViewModelBase viewModel)
 {
-    public PageItem(string name, ViewModelBase viewModel)
-    {
-        Name = name;
-        ViewModel = viewModel;
-    }
-
-    public string Name { get; }
-    public ViewModelBase ViewModel { get; }
+    public string Name { get; } = name;
+    public ViewModelBase ViewModel { get; } = viewModel;
 }

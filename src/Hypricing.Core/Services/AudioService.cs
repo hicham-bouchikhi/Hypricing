@@ -10,15 +10,9 @@ namespace Hypricing.Core.Services;
 /// Manages audio backend lifecycle: auto-detects or loads a user-configured preset,
 /// then delegates all operations to the <see cref="JsonAudioBackend"/>.
 /// </summary>
-public sealed class AudioService
+public sealed class AudioService(CliRunner cli)
 {
-    private readonly CliRunner _cli;
     private JsonAudioBackend? _backend;
-
-    public AudioService(CliRunner cli)
-    {
-        _cli = cli;
-    }
 
     public IAudioBackend? Backend => _backend;
     public string? ActivePresetName => _backend?.PresetName;
@@ -43,7 +37,7 @@ public sealed class AudioService
                 var preset = JsonSerializer.Deserialize(json, AudioPresetContext.Default.AudioPreset);
                 if (preset is not null)
                 {
-                    _backend = new JsonAudioBackend(_cli, preset);
+                    _backend = new JsonAudioBackend(cli, preset);
                     return;
                 }
             }
@@ -59,7 +53,7 @@ public sealed class AudioService
         {
             if (await IsToolAvailableAsync(preset.Detect, ct))
             {
-                _backend = new JsonAudioBackend(_cli, preset);
+                _backend = new JsonAudioBackend(cli, preset);
 
                 // Write detected preset to user config for future editing
                 var dir = Path.GetDirectoryName(userConfig)!;
@@ -110,7 +104,7 @@ public sealed class AudioService
         if (string.IsNullOrEmpty(tool)) return false;
         try
         {
-            await _cli.RunAsync("which", tool, ct);
+            await cli.RunAsync("which", tool, ct);
             return true;
         }
         catch
