@@ -7,8 +7,10 @@ A GUI settings manager for [Hyprland](https://hyprland.org). Provides a graphica
 - **Variables** — add, edit, and remove `$var` declarations and `env` environment variables
 - **Keybindings** — manage `bind`, `binde`, `bindm` and other bind variants
 - **Display** — drag-and-drop monitor layout with edge snapping
+- **Input** — keyboard layout, mouse sensitivity, cursor behavior, touchpad settings
 - **Startup** — manage `exec`, `exec-once`, and `exec-shutdown` entries
 - **Audio** — volume, mute, default device, stream routing (PipeWire + PulseAudio, extensible via JSON presets)
+- **Power** — switch power profiles (performance / balanced / power-saver) via `powerprofilesctl`; battery status on laptops
 - **Backups** — create, restore, and delete zip backups of all config files
 - **Multi-file support** — follows `source =` includes across config files
 - **Native AOT** — 18MB self-contained binary, no runtime needed
@@ -41,9 +43,11 @@ sudo cp publish/Hypricing.Desktop /usr/bin/hypricing
 
 | Version | Scope |
 |---|---|
-| v0.1 | Parser, variables, keybindings, display, startup, backups, audio, Native AOT, AUR packaging |
-| v0.2 | Power page (profiles, hypridle, battery) |
-| v0.3 | Bluetooth page |
+| v0.1 | Parser, variables, keybindings, display, startup, backups, Native AOT |
+| v0.2 | Audio (PipeWire + PulseAudio, JSON presets) |
+| v0.3 | Input page (keyboard, mouse, cursor, touchpad) |
+| v0.4 | Power page (profiles via powerprofilesctl, battery status) |
+| v0.5 | Bluetooth page |
 | v1.0 | Polish, themes, structured inputs |
 
 ## Project Structure
