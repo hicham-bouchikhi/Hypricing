@@ -7,6 +7,7 @@ namespace Hypricing.Desktop.ViewModels;
 public sealed class InputViewModel : ViewModelBase
 {
     private readonly HyprlandService _service;
+    private readonly XkbService _xkb;
 
     // Keyboard
     private string _kbLayout = string.Empty;
@@ -42,9 +43,10 @@ public sealed class InputViewModel : ViewModelBase
     private bool _dragLock;
     private bool _clickfingerBehavior;
 
-    public InputViewModel(HyprlandService service)
+    public InputViewModel(HyprlandService service, XkbService xkb)
     {
         _service = service;
+        _xkb = xkb;
         SaveCommand = new AsyncRelayCommand(SaveAsync);
     }
 
@@ -52,6 +54,26 @@ public sealed class InputViewModel : ViewModelBase
 
     public static IReadOnlyList<string> AccelProfiles { get; } = ["", "flat", "adaptive", "custom"];
     public static IReadOnlyList<string> FollowMouseOptions { get; } = ["0", "1", "2", "3"];
+
+    public string[] Layouts
+    {
+        get;
+        private set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = [];
+
+    public string[] Variants
+    {
+        get;
+        private set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = [];
 
     public string? StatusMessage
     {
@@ -68,13 +90,26 @@ public sealed class InputViewModel : ViewModelBase
     public string KbLayout
     {
         get => _kbLayout;
-        set { if (_kbLayout == value) return; _kbLayout = value; OnPropertyChanged(); }
+        set
+        {
+            value ??= string.Empty;
+            if (_kbLayout == value) return;
+            _kbLayout = value;
+            OnPropertyChanged();
+            _ = LoadVariantsAsync(value);
+        }
     }
 
     public string KbVariant
     {
         get => _kbVariant;
-        set { if (_kbVariant == value) return; _kbVariant = value; OnPropertyChanged(); }
+        set
+        {
+            value ??= string.Empty;
+            if (_kbVariant == value) return;
+            _kbVariant = value;
+            OnPropertyChanged();
+        }
     }
 
     public string KbModel
@@ -242,6 +277,18 @@ public sealed class InputViewModel : ViewModelBase
         }
     }
 
+    public async Task InitializeAsync()
+    {
+        try
+        {
+            Layouts = await _xkb.GetLayoutsAsync();
+        }
+        catch
+        {
+            // localectl unavailable — ComboBoxes still work as free-text via IsEditable
+        }
+    }
+
     public void Refresh()
     {
         // Keyboard
@@ -279,6 +326,12 @@ public sealed class InputViewModel : ViewModelBase
         _clickfingerBehavior = ParseBool(_service.GetSectionValue("input", "touchpad", "clickfinger_behavior"), false);
 
         OnPropertyChanged(string.Empty);
+        _ = LoadVariantsAsync(_kbLayout);
+    }
+
+    private async Task LoadVariantsAsync(string layout)
+    {
+        Variants = await _xkb.GetVariantsAsync(layout);
     }
 
     private async Task SaveAsync()

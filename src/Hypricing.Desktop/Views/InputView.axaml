@@ -44,19 +44,22 @@
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                        Text="Layout"
                                        Foreground="#6c7086" VerticalAlignment="Center" Margin="0,0,0,8" />
-                            <TextBox Grid.Row="0" Grid.Column="1"
-                                     Text="{Binding KbLayout, Mode=TwoWay}"
-                                     Watermark="us"
-                                     FontFamily="JetBrains Mono, Cascadia Code, monospace"
-                                     Margin="0,0,0,8" />
+                            <ComboBox Grid.Row="0" Grid.Column="1"
+                                      ItemsSource="{Binding Layouts}"
+                                      SelectedItem="{Binding KbLayout, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch"
+                                      FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                      Margin="0,0,0,8" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0"
                                        Text="Variant"
                                        Foreground="#6c7086" VerticalAlignment="Center" Margin="0,0,0,8" />
-                            <TextBox Grid.Row="1" Grid.Column="1"
-                                     Text="{Binding KbVariant, Mode=TwoWay}"
-                                     FontFamily="JetBrains Mono, Cascadia Code, monospace"
-                                     Margin="0,0,0,8" />
+                            <ComboBox Grid.Row="1" Grid.Column="1"
+                                      ItemsSource="{Binding Variants}"
+                                      SelectedItem="{Binding KbVariant, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch"
+                                      FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                      Margin="0,0,0,8" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0"
                                        Text="Model"

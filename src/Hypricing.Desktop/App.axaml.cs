@@ -25,7 +25,8 @@ public partial class App : Application
             var startupVm = new StartupViewModel(service);
             var keybindingsVm = new KeybindingsViewModel(service);
             var monitorsVm = new MonitorsViewModel(service);
-            var inputVm = new InputViewModel(service);
+            var xkbService = new XkbService(cli);
+            var inputVm = new InputViewModel(service, xkbService);
             var audioService = new AudioService(cli);
             var audioVm = new AudioViewModel(audioService);
             var powerService = new PowerService(cli);
@@ -46,6 +47,7 @@ public partial class App : Application
                     startupVm.Refresh();
                     keybindingsVm.Refresh();
                     monitorsVm.Refresh();
+                    _ = inputVm.InitializeAsync();
                     inputVm.Refresh();
                     _ = audioVm.InitializeAsync();
                     _ = powerVm.InitializeAsync();
