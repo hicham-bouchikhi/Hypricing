@@ -18,30 +18,43 @@
             <Setter Property="Background" Value="#313244" />
             <Setter Property="CornerRadius" Value="12" />
             <Setter Property="Padding" Value="16" />
-            <Setter Property="BoxShadow" Value="0 2 8 0 #18000000" />
+            <Setter Property="BorderBrush" Value="#3b3b52" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BoxShadow" Value="0 2 12 0 #22000000" />
         </Style>
         <Style Selector="Border.card-elevated">
             <Setter Property="Background" Value="#313244" />
             <Setter Property="CornerRadius" Value="12" />
             <Setter Property="Padding" Value="16" />
-            <Setter Property="BoxShadow" Value="0 4 16 0 #28000000" />
+            <Setter Property="BorderBrush" Value="#3b3b52" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BoxShadow" Value="0 4 20 0 #32000000" />
         </Style>
         <Style Selector="Border.card-item">
-            <Setter Property="Background" Value="#2a2a3c" />
+            <Setter Property="Background" Value="#24243a" />
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Padding" Value="12,10" />
             <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="BorderBrush" Value="#35354e" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12" />
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="Border.card-item:pointerover">
-            <Setter Property="Background" Value="#353548" />
+            <Setter Property="Background" Value="#2e2e48" />
+            <Setter Property="BorderBrush" Value="#585b70" />
         </Style>
 
         <!-- ═══════════════ TextBox ═══════════════ -->
         <Style Selector="TextBox">
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Background" Value="#45475a" />
+            <Setter Property="Background" Value="#3b3b54" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="#45475a" />
             <Setter Property="Padding" Value="10,8" />
             <Setter Property="Foreground" Value="#cdd6f4" />
             <Setter Property="Transitions">
@@ -52,12 +65,13 @@
             </Setter>
         </Style>
         <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="#505069" />
+            <Setter Property="Background" Value="#45475a" />
+            <Setter Property="BorderBrush" Value="#585b70" />
         </Style>
         <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
             <Setter Property="BorderBrush" Value="#89b4fa" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="#45475a" />
+            <Setter Property="Background" Value="#3b3b54" />
         </Style>
 
         <!-- ═══════════════ Accent Button ═══════════════ -->
@@ -100,8 +114,28 @@
             <Setter Property="BorderThickness" Value="0" />
         </Style>
         <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#45475a" />
+            <Setter Property="Background" Value="#313244" />
             <Setter Property="Foreground" Value="#cdd6f4" />
+        </Style>
+
+        <!-- ═══════════════ Nav Item Button (sidebar footer) ═══════════════ -->
+        <Style Selector="Button.nav-item">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#6c7086" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.12" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.nav-item:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1c1c2e" />
+        </Style>
+        <Style Selector="Button.nav-item:pointerover">
+            <Setter Property="Foreground" Value="#a6adc8" />
         </Style>
 
         <!-- ═══════════════ Default Button ═══════════════ -->
@@ -113,8 +147,9 @@
         <!-- ═══════════════ ComboBox ═══════════════ -->
         <Style Selector="ComboBox">
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Background" Value="#45475a" />
-            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="#3b3b54" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#45475a" />
         </Style>
 
         <!-- ═══════════════ Sidebar ═══════════════ -->
@@ -124,44 +159,51 @@
         </Style>
         <Style Selector="ListBox.sidebar ListBoxItem">
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Margin" Value="8,2" />
-            <Setter Property="Padding" Value="12,10" />
-            <Setter Property="Foreground" Value="#a6adc8" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="Padding" Value="12,9" />
+            <Setter Property="Foreground" Value="#6c7086" />
             <Setter Property="Transitions">
                 <Transitions>
-                    <BrushTransition Property="Foreground" Duration="0:0:0.15" />
+                    <BrushTransition Property="Foreground" Duration="0:0:0.12" />
                 </Transitions>
             </Setter>
         </Style>
-        <Style Selector="ListBox.sidebar ListBoxItem:selected">
-            <Setter Property="Foreground" Value="#cdd6f4" />
-        </Style>
-        <Style Selector="ListBox.sidebar ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#313244" />
+        <Style Selector="ListBox.sidebar ListBoxItem:pointerover">
+            <Setter Property="Foreground" Value="#a6adc8" />
         </Style>
         <Style Selector="ListBox.sidebar ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#252536" />
+            <Setter Property="Background" Value="#1c1c2e" />
+        </Style>
+        <Style Selector="ListBox.sidebar ListBoxItem:selected">
+            <Setter Property="Foreground" Value="#89b4fa" />
+        </Style>
+        <Style Selector="ListBox.sidebar ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1e2a45" />
+        </Style>
+        <Style Selector="ListBox.sidebar ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#22305a" />
         </Style>
 
         <!-- ═══════════════ Badge ═══════════════ -->
         <Style Selector="Border.badge">
             <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="8,4" />
-            <Setter Property="Background" Value="#1e1e2e" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="Background" Value="#2a3a55" />
+            <Setter Property="Height" Value="28" />
         </Style>
 
         <!-- ═══════════════ Typography ═══════════════ -->
         <Style Selector="TextBlock.page-title">
-            <Setter Property="FontSize" Value="26" />
+            <Setter Property="FontSize" Value="24" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#cdd6f4" />
-            <Setter Property="Margin" Value="0,0,0,24" />
+            <Setter Property="Margin" Value="0,0,0,20" />
         </Style>
 
         <Style Selector="TextBlock.section-title">
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="#6c7086" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="#9399b2" />
             <Setter Property="Margin" Value="4,16,0,8" />
         </Style>
 
@@ -180,12 +222,17 @@
             <Setter Property="FontFamily" Value="JetBrains Mono, Cascadia Code, monospace" />
         </Style>
 
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="#7f849c" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
         <!-- ═══════════════ Separator ═══════════════ -->
         <Style Selector="Border.separator">
             <Setter Property="Height" Value="1" />
-            <Setter Property="Background" Value="#45475a" />
+            <Setter Property="Background" Value="#313244" />
             <Setter Property="Margin" Value="0,8" />
-            <Setter Property="Opacity" Value="0.5" />
         </Style>
 
         <!-- ═══════════════ ScrollViewer ═══════════════ -->
@@ -197,7 +244,7 @@
         <Style Selector="ContentControl.page-host">
             <Setter Property="Transitions">
                 <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
                 </Transitions>
             </Setter>
         </Style>

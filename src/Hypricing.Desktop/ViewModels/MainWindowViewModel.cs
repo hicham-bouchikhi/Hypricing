@@ -19,14 +19,14 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         Pages =
         [
-            new PageItem("Variables", variablesPage),
+            new PageItem("Variables",   variablesPage),
             new PageItem("Keybindings", keybindingsPage),
-            new PageItem("Display", monitorsPage),
-            new PageItem("Input", inputPage),
-            new PageItem("Startup", startupPage),
-            new PageItem("Audio", audioPage),
-            new PageItem("Power", new PlaceholderViewModel("Power")),
-            new PageItem("Bluetooth", new PlaceholderViewModel("Bluetooth")),
+            new PageItem("Display",     monitorsPage),
+            new PageItem("Input",       inputPage),
+            new PageItem("Startup",     startupPage),
+            new PageItem("Audio",       audioPage),
+            new PageItem("Power",       new PlaceholderViewModel("Power")),
+            new PageItem("Bluetooth",   new PlaceholderViewModel("Bluetooth")),
         ];
 
         _currentPage = variablesPage;
