@@ -13,6 +13,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         MonitorsViewModel monitorsPage,
         InputViewModel inputPage,
         AudioViewModel audioPage,
+        PowerViewModel powerPage,
         BackupViewModel backupPage)
     {
         BackupPage = backupPage;
@@ -25,7 +26,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             new PageItem("Input",       inputPage),
             new PageItem("Startup",     startupPage),
             new PageItem("Audio",       audioPage),
-            new PageItem("Power",       new PlaceholderViewModel("Power")),
+            new PageItem("Power",       powerPage),
             new PageItem("Bluetooth",   new PlaceholderViewModel("Bluetooth")),
         ];
 

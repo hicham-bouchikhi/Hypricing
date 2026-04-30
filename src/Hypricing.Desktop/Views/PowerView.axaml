@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Hypricing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Hypricing.Desktop.Views.PowerView"
+             x:DataType="vm:PowerViewModel">
+
+    <DockPanel>
+
+        <TextBlock DockPanel.Dock="Top"
+                   Classes="page-title"
+                   Text="Power" />
+
+        <!-- Bottom bar -->
+        <Border DockPanel.Dock="Bottom"
+                Classes="card-elevated"
+                CornerRadius="12,12,0,0"
+                Padding="20,14"
+                Margin="0,16,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Classes="status"
+                           Text="{Binding StatusMessage}" />
+                <Button Grid.Column="1"
+                        Classes="accent"
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}" />
+            </Grid>
+        </Border>
+
+        <ScrollViewer>
+            <StackPanel Spacing="24">
+
+                <!-- ═══════════════ Battery ═══════════════ -->
+                <StackPanel IsVisible="{Binding HasBattery}">
+                    <TextBlock Classes="section-title" Text="Battery" />
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding BatteryLabel}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="#cdd6f4"
+                                       VerticalAlignment="Center" />
+
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding BatteryPercentage, StringFormat={}{0:0}%}"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#89b4fa"
+                                       VerticalAlignment="Center" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding BatteryTimeEstimate}"
+                                       IsVisible="{Binding BatteryTimeEstimate, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                       FontSize="13"
+                                       Foreground="#6c7086"
+                                       Margin="0,6,0,0" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ═══════════════ Power Profile ═══════════════ -->
+                <StackPanel>
+                    <TextBlock Classes="section-title" Text="Power Profile" />
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="140,*">
+                            <TextBlock Grid.Column="0"
+                                       Text="Profile"
+                                       Foreground="#6c7086"
+                                       VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding Profiles}"
+                                      SelectedItem="{Binding ActiveProfile, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+
+</UserControl>
