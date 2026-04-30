@@ -27,13 +27,17 @@ public sealed class PowerService(CliRunner cli)
         try
         {
             var devices = await cli.RunAsync("upower", "-e", ct);
-            var battery = devices
-                .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                .FirstOrDefault(d => d.Contains("battery", StringComparison.OrdinalIgnoreCase));
-            if (battery is null) return null;
+            foreach (var device in devices.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (!device.Contains("battery", StringComparison.OrdinalIgnoreCase)) continue;
 
-            var info = await cli.RunAsync("upower", $"-i {battery}", ct);
-            return ParseBattery(info);
+                var info = await cli.RunAsync("upower", $"-i {device}", ct);
+                // Peripheral batteries (mice, keyboards) have "power supply: no" — skip them
+                if (!info.Contains("power supply:         yes", StringComparison.Ordinal)) continue;
+
+                return ParseBattery(info);
+            }
+            return null;
         }
         catch
         {
