@@ -187,9 +187,8 @@
         <!-- ═══════════════ Badge ═══════════════ -->
         <Style Selector="Border.badge">
             <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="Padding" Value="8,5" />
             <Setter Property="Background" Value="#2a3a55" />
-            <Setter Property="Height" Value="28" />
         </Style>
 
         <!-- ═══════════════ Typography ═══════════════ -->
