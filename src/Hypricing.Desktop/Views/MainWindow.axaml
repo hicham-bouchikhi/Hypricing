@@ -103,6 +103,9 @@
                     <DataTemplate DataType="vm:AudioViewModel">
                         <views:AudioView />
                     </DataTemplate>
+                    <DataTemplate DataType="vm:PowerViewModel">
+                        <views:PowerView />
+                    </DataTemplate>
                     <DataTemplate DataType="vm:BackupViewModel">
                         <views:BackupView />
                     </DataTemplate>
