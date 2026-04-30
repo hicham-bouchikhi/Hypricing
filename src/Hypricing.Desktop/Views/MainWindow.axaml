@@ -15,65 +15,68 @@
         <!-- Sidebar -->
         <Border Grid.Column="0"
                 Background="#11111b"
+                BorderBrush="#1e1e30"
+                BorderThickness="0,0,1,0"
                 Padding="0,16">
             <DockPanel>
                 <!-- App branding -->
-                <StackPanel DockPanel.Dock="Top" Margin="24,8,24,24">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Border Background="#89b4fa"
-                                CornerRadius="8"
-                                Width="32" Height="32"
-                                Padding="0">
-                            <TextBlock Text="H"
-                                       FontSize="18"
-                                       FontWeight="Bold"
-                                       Foreground="#11111b"
+                <StackPanel DockPanel.Dock="Top" Margin="20,8,20,20">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Background="Transparent"
+                                CornerRadius="10"
+                                Width="36" Height="36"
+                                BorderBrush="#89b4fa"
+                                BorderThickness="2">
+                            <TextBlock Text="⚙"
+                                       FontSize="17"
+                                       Foreground="#89b4fa"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Hypricing"
-                                       FontSize="18"
+                                       FontSize="16"
                                        FontWeight="Bold"
                                        Foreground="#cdd6f4" />
-                            <TextBlock Text="Settings Manager"
+                            <TextBlock Text="Hyprland Settings"
                                        FontSize="10"
-                                       Foreground="#585b70" />
+                                       Foreground="#45475a" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Separator -->
-                <Border DockPanel.Dock="Top" Classes="separator" Margin="16,0" />
+                <Border DockPanel.Dock="Top" Classes="separator" Margin="20,0,20,8" />
 
                 <!-- Backups at bottom -->
-                <StackPanel DockPanel.Dock="Bottom" Margin="12,0">
-                    <Border Classes="separator" Margin="4,0,4,4" />
-                    <Button Classes="ghost"
+                <StackPanel DockPanel.Dock="Bottom" Margin="10,0">
+                    <Border Classes="separator" Margin="6,0,6,6" />
+                    <Button Classes="nav-item"
                             Command="{Binding OpenBackupsCommand}"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Left"
                             Padding="12,10"
                             CornerRadius="8">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBlock Text="&#x1F4E6;"
-                                       FontSize="14"
-                                       VerticalAlignment="Center" />
-                            <TextBlock Text="Backups"
-                                       FontSize="14"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
+                        <TextBlock Text="Backups" FontSize="13" />
                     </Button>
                 </StackPanel>
+
+                <!-- Nav section label -->
+                <TextBlock DockPanel.Dock="Top"
+                           Text="NAVIGATION"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           Foreground="#45475a"
+                           Margin="22,4,0,6" />
 
                 <!-- Page list -->
                 <ListBox Classes="sidebar"
                          ItemsSource="{Binding Pages}"
-                         SelectedItem="{Binding SelectedPage}">
+                         SelectedItem="{Binding SelectedPage}"
+                         Margin="10,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vm:PageItem">
-                            <TextBlock Text="{Binding Name}"
-                                       FontSize="14" />
+                            <TextBlock Text="{Binding Name}" FontSize="13" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -81,7 +84,7 @@
         </Border>
 
         <!-- Content area -->
-        <Border Grid.Column="1" Padding="32,24">
+        <Border Grid.Column="1" Background="#1e1e2e" Padding="36,28">
             <ContentControl Classes="page-host"
                             Content="{Binding CurrentPage}">
                 <ContentControl.DataTemplates>

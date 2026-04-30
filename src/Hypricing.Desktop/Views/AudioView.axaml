@@ -56,7 +56,10 @@
                                                         Classes="badge"
                                                         IsVisible="{Binding IsDefault}"
                                                         Margin="0,0,8,0">
-                                                    <TextBlock Text="Default" FontSize="11" />
+                                                    <TextBlock Text="Default" FontSize="11"
+                                                               Foreground="#89b4fa"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center" />
                                                 </Border>
                                                 <Button Grid.Column="1"
                                                         Classes="ghost"
