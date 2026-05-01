@@ -28,7 +28,12 @@ build() {
 
 package() {
     cd Hypricing
-    install -Dm755 publish/Hypricing.Desktop "$pkgdir/usr/bin/hypricing"
-    install -Dm644 hypricing.desktop "$pkgdir/usr/share/applications/hypricing.desktop"
-    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm755 publish/Hypricing.Desktop      "$pkgdir/usr/lib/hypricing/hypricing"
+    install -Dm755 publish/libSkiaSharp.so        "$pkgdir/usr/lib/hypricing/libSkiaSharp.so"
+    install -Dm755 publish/libHarfBuzzSharp.so    "$pkgdir/usr/lib/hypricing/libHarfBuzzSharp.so"
+    install -dm755                                 "$pkgdir/usr/bin"
+    ln -s /usr/lib/hypricing/hypricing            "$pkgdir/usr/bin/hypricing"
+    install -Dm644 assets/hypricing.svg           "$pkgdir/usr/share/icons/hicolor/scalable/apps/hypricing.svg"
+    install -Dm644 hypricing.desktop              "$pkgdir/usr/share/applications/hypricing.desktop"
+    install -Dm644 LICENSE                        "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

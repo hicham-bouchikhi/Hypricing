@@ -23,7 +23,9 @@ A GUI settings manager for [Hyprland](https://hyprland.org). Provides a graphica
 
 ### AUR (Arch Linux)
 
-Coming soon.
+```bash
+yay -S hypricing-git
+```
 
 ### From source
 
