@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Native AOT prerequisites
+        run: sudo apt-get install -y clang zlib1g-dev
+
+      - name: Publish AOT binary
+        run: |
+          dotnet publish src/Hypricing.Desktop/Hypricing.Desktop.csproj \
+            -c Release -r linux-x64 --self-contained true -o publish
+
+      - name: Bundle release tarball
+        run: |
+          mkdir -p bundle
+          cp publish/Hypricing.Desktop bundle/
+          cp publish/libSkiaSharp.so bundle/
+          cp publish/libHarfBuzzSharp.so bundle/
+          tar -czf hypricing-${{ github.ref_name }}-linux-x64.tar.gz -C bundle .
+          echo "SHA256=$(sha256sum hypricing-${{ github.ref_name }}-linux-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hypricing-linux-x64
+          path: hypricing-${{ github.ref_name }}-linux-x64.tar.gz
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            "hypricing-${{ github.ref_name }}-linux-x64.tar.gz" \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
+
+      - name: Update hypricing-bin on AUR
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          VERSION="${{ github.ref_name }}"
+          PKGVER="${VERSION#v}"
+
+          mkdir -p ~/.ssh
+          echo "$AUR_SSH_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          cat >> ~/.ssh/config <<EOF
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+            StrictHostKeyChecking no
+          EOF
+
+          git clone ssh://aur@aur.archlinux.org/hypricing-bin.git aur-bin
+          cd aur-bin
+          sed -i "s/^pkgver=.*/pkgver=${PKGVER}/" PKGBUILD
+          sed -i "s/^sha256sums=.*/sha256sums=('${SHA256}')/" PKGBUILD
+          makepkg --printsrcinfo > .SRCINFO
+          git config user.name "Esperadoce"
+          git config user.email "hbouchikhi@cegid.com"
+          git add PKGBUILD .SRCINFO
+          git commit -m "Update to ${VERSION}"
+          git push
