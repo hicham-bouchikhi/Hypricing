@@ -50,6 +50,9 @@ sudo cp publish/Hypricing.Desktop /usr/bin/hypricing
 | v0.3 | Input page (keyboard, mouse, cursor, touchpad) |
 | v0.4 | Power page (profiles via powerprofilesctl, battery status) |
 | v0.5 | Bluetooth page |
+| v0.7 | Idle behavior — configure screen timeout, lock, and suspend via `hypridle` |
+| v0.8 | Incremental saves — only the modified option is rewritten in-place; the rest of the config is untouched |
+| v0.9 | Wallpaper — set and preview wallpapers per monitor via `hyprpaper`, `swww`, or `awww` (swww successor) |
 | v1.0 | Polish, themes, structured inputs |
 
 ## Project Structure
