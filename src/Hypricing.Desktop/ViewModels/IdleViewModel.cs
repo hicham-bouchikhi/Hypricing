@@ -27,17 +27,6 @@ public sealed class IdleViewModel : ViewModelBase
     public ICommand RestartCommand { get; }
     public ICommand AddListenerCommand { get; }
 
-    public bool IsAvailable
-    {
-        get;
-        private set
-        {
-            if (field == value) return;
-            field = value;
-            OnPropertyChanged();
-        }
-    }
-
     public bool IsDaemonRunning
     {
         get;
@@ -116,11 +105,9 @@ public sealed class IdleViewModel : ViewModelBase
         if (_service.Error is not null)
         {
             StatusMessage = _service.Error;
-            IsAvailable = false;
             return;
         }
 
-        IsAvailable = true;
         StatusMessage = $"Using {_service.ActivePresetName}";
         await LoadAsync();
         await RefreshDaemonStatusAsync();
@@ -231,6 +218,18 @@ public sealed class IdleListenerViewModel : ViewModelBase
             if (field == value) return;
             field = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(TimeoutText));
+        }
+    }
+
+    public string TimeoutText
+    {
+        get => TimeoutSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        set
+        {
+            if (int.TryParse(value, System.Globalization.NumberStyles.Integer,
+                    System.Globalization.CultureInfo.InvariantCulture, out var n) && n > 0)
+                TimeoutSeconds = n;
         }
     }
 

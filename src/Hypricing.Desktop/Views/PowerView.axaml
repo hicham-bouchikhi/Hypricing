@@ -82,7 +82,7 @@
                 </StackPanel>
 
                 <!-- ═══════════════ Idle ═══════════════ -->
-                <StackPanel IsVisible="{Binding Idle.IsAvailable}">
+                <StackPanel>
                     <TextBlock Classes="section-title" Text="Idle" />
 
                     <!-- Daemon control -->
@@ -155,11 +155,11 @@
                                     <DataTemplate x:DataType="vm:IdleListenerViewModel">
                                         <Border Classes="card-item" Padding="14,8">
                                             <Grid ColumnDefinitions="100,*,*,Auto">
-                                                <NumericUpDown Grid.Column="0"
-                                                               Value="{Binding TimeoutSeconds, Mode=TwoWay}"
-                                                               Minimum="1" Maximum="86400"
-                                                               Margin="0,0,8,0"
-                                                               FormatString="0" />
+                                                <TextBox Grid.Column="0"
+                                                         Text="{Binding TimeoutText, Mode=TwoWay}"
+                                                         Watermark="seconds"
+                                                         FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                                         Margin="0,0,8,0" />
                                                 <TextBox Grid.Column="1"
                                                          Text="{Binding OnTimeout, Mode=TwoWay}"
                                                          Watermark="command"

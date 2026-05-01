@@ -41,4 +41,5 @@ public sealed class IdlePresetListenerFields
 }
 
 [JsonSerializable(typeof(IdlePreset))]
-internal sealed partial class IdlePresetContext : JsonSerializerContext { }
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+internal sealed partial class IdlePresetContext : JsonSerializerContext;
