@@ -138,9 +138,9 @@ public sealed class NetworkDeviceViewModel : ViewModelBase
     public string Name => _device.Name;
     public string TypeLabel => _device.Type switch
     {
-        "wifi"     => "WiFi",
+        "wifi" => "WiFi",
         "ethernet" => "Ethernet",
-        _          => _device.Type,
+        _ => _device.Type,
     };
     public string State => _device.State;
     public string? Connection => _device.Connection;
@@ -186,7 +186,7 @@ public sealed class WifiNetworkViewModel : ViewModelBase
         >= 75 => 4,
         >= 50 => 3,
         >= 25 => 2,
-        _     => 1,
+        _ => 1,
     };
 
     // Per-bar opacity: bar N is full if SignalBars >= N, dimmed otherwise
