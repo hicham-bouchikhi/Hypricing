@@ -93,6 +93,36 @@
                     </Border>
                 </StackPanel>
 
+                <!-- Nearby Devices (scan results) -->
+                <StackPanel IsVisible="{Binding HasScanResults}">
+                    <TextBlock Classes="section-title" Text="Nearby Devices" />
+                    <Border Classes="card">
+                        <ItemsControl ItemsSource="{Binding ScanResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BluetoothDeviceViewModel">
+                                    <Border Classes="card-item" Padding="14,12">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#cdd6f4" />
+                                                <TextBlock Text="{Binding Address}"
+                                                           Classes="muted"
+                                                           FontFamily="JetBrains Mono, Cascadia Code, monospace" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Classes="ghost"
+                                                    Content="Connect"
+                                                    Command="{Binding ConnectCommand}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </StackPanel>
+
             </StackPanel>
         </ScrollViewer>
 

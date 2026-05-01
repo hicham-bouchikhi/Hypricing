@@ -15,6 +15,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         AudioViewModel audioPage,
         PowerViewModel powerPage,
         BluetoothViewModel bluetoothPage,
+        NetworkViewModel networkPage,
         BackupViewModel backupPage)
     {
         BackupPage = backupPage;
@@ -29,6 +30,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             new PageItem("Audio",       audioPage),
             new PageItem("Power",       powerPage),
             new PageItem("Bluetooth",   bluetoothPage),
+            new PageItem("Network",     networkPage),
         ];
 
         _currentPage = variablesPage;

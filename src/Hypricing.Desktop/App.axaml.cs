@@ -35,8 +35,10 @@ public partial class App : Application
             var powerVm = new PowerViewModel(powerService, idleVm);
             var bluetoothService = new BluetoothService(cli);
             var bluetoothVm = new BluetoothViewModel(bluetoothService);
+            var networkService = new NetworkService(cli);
+            var networkVm = new NetworkViewModel(networkService);
             var backupVm = new BackupViewModel(service);
-            var mainVm = new MainWindowViewModel(variablesVm, startupVm, keybindingsVm, monitorsVm, inputVm, audioVm, powerVm, bluetoothVm, backupVm);
+            var mainVm = new MainWindowViewModel(variablesVm, startupVm, keybindingsVm, monitorsVm, inputVm, audioVm, powerVm, bluetoothVm, networkVm, backupVm);
 
             desktop.MainWindow = new MainWindow
             {
@@ -57,6 +59,7 @@ public partial class App : Application
                     _ = powerVm.InitializeAsync();
                     _ = idleVm.InitializeAsync();
                     _ = bluetoothVm.InitializeAsync();
+                    _ = networkVm.InitializeAsync();
                     backupVm.Refresh();
                 },
                 TaskScheduler.FromCurrentSynchronizationContext());

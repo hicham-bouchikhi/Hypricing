@@ -16,6 +16,9 @@ public sealed class BluetoothViewModel : ViewModelBase
     }
 
     public ObservableCollection<BluetoothDeviceViewModel> Devices { get; } = [];
+    public ObservableCollection<BluetoothDeviceViewModel> ScanResults { get; } = [];
+
+    public bool HasScanResults => ScanResults.Count > 0;
 
     public ICommand RefreshCommand { get; }
     public ICommand ScanCommand { get; }
@@ -57,7 +60,9 @@ public sealed class BluetoothViewModel : ViewModelBase
         {
             var devices = await _service.GetDevicesAsync();
             Devices.Clear();
-            foreach (var d in devices)
+            ScanResults.Clear();
+            OnPropertyChanged(nameof(HasScanResults));
+            foreach (var d in devices.Where(d => d.Paired))
                 Devices.Add(new BluetoothDeviceViewModel(d, _service, this));
 
             StatusMessage = Devices.Count == 0 ? "No paired devices found" : $"{Devices.Count} device(s)";
@@ -80,7 +85,28 @@ public sealed class BluetoothViewModel : ViewModelBase
         {
             IsScanning = false;
         }
-        await RefreshAsync();
+
+        try
+        {
+            var devices = await _service.GetDevicesAsync();
+            Devices.Clear();
+            ScanResults.Clear();
+            foreach (var d in devices)
+            {
+                if (d.Paired)
+                    Devices.Add(new BluetoothDeviceViewModel(d, _service, this));
+                else
+                    ScanResults.Add(new BluetoothDeviceViewModel(d, _service, this));
+            }
+            OnPropertyChanged(nameof(HasScanResults));
+            StatusMessage = ScanResults.Count > 0
+                ? $"{ScanResults.Count} nearby device(s) found"
+                : "No new devices found";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Scan failed: {ex.Message}";
+        }
     }
 
     internal Task OnChanged() => RefreshAsync();

@@ -112,6 +112,9 @@
                     <DataTemplate DataType="vm:BluetoothViewModel">
                         <views:BluetoothView />
                     </DataTemplate>
+                    <DataTemplate DataType="vm:NetworkViewModel">
+                        <views:NetworkView />
+                    </DataTemplate>
                     <DataTemplate DataType="vm:BackupViewModel">
                         <views:BackupView />
                     </DataTemplate>
