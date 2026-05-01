@@ -81,6 +81,122 @@
                     </Border>
                 </StackPanel>
 
+                <!-- ═══════════════ Idle ═══════════════ -->
+                <StackPanel IsVisible="{Binding Idle.IsAvailable}">
+                    <TextBlock Classes="section-title" Text="Idle" />
+
+                    <!-- Daemon control -->
+                    <Border Classes="card" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="{Binding Idle.ActivePresetLabel}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="#cdd6f4" />
+                                <TextBlock Text="{Binding Idle.DaemonStatusText}"
+                                           Classes="muted" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="ghost" Content="Start"
+                                    Command="{Binding Idle.StartCommand}" Margin="0,0,8,0" />
+                            <Button Grid.Column="2" Classes="ghost" Content="Stop"
+                                    Command="{Binding Idle.StopCommand}" Margin="0,0,8,0" />
+                            <Button Grid.Column="3" Classes="ghost" Content="Restart"
+                                    Command="{Binding Idle.RestartCommand}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- General settings -->
+                    <Border Classes="card" Margin="0,0,0,8">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="160,*">
+                                <TextBlock Grid.Column="0" Text="lock_cmd"
+                                           Foreground="#6c7086" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Idle.LockCmd, Mode=TwoWay}"
+                                         Watermark="e.g. hyprlock" />
+                            </Grid>
+                            <Grid ColumnDefinitions="160,*">
+                                <TextBlock Grid.Column="0" Text="unlock_cmd"
+                                           Foreground="#6c7086" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Idle.UnlockCmd, Mode=TwoWay}"
+                                         Watermark="optional" />
+                            </Grid>
+                            <Grid ColumnDefinitions="160,*">
+                                <TextBlock Grid.Column="0" Text="before_sleep_cmd"
+                                           Foreground="#6c7086" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Idle.BeforeSleepCmd, Mode=TwoWay}"
+                                         Watermark="optional" />
+                            </Grid>
+                            <Grid ColumnDefinitions="160,*">
+                                <TextBlock Grid.Column="0" Text="after_sleep_cmd"
+                                           Foreground="#6c7086" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Idle.AfterSleepCmd, Mode=TwoWay}"
+                                         Watermark="optional" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Listeners -->
+                    <Border Classes="card" Margin="0,0,0,8">
+                        <StackPanel>
+                            <Grid ColumnDefinitions="100,*,*,Auto" Margin="14,10">
+                                <TextBlock Grid.Column="0" Text="Timeout (s)"
+                                           FontSize="11" Foreground="#6c7086" />
+                                <TextBlock Grid.Column="1" Text="on-timeout"
+                                           FontSize="11" Foreground="#6c7086" Margin="8,0,0,0" />
+                                <TextBlock Grid.Column="2" Text="on-resume"
+                                           FontSize="11" Foreground="#6c7086" Margin="8,0,0,0" />
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding Idle.Listeners}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:IdleListenerViewModel">
+                                        <Border Classes="card-item" Padding="14,8">
+                                            <Grid ColumnDefinitions="100,*,*,Auto">
+                                                <NumericUpDown Grid.Column="0"
+                                                               Value="{Binding TimeoutSeconds, Mode=TwoWay}"
+                                                               Minimum="1" Maximum="86400"
+                                                               Margin="0,0,8,0"
+                                                               FormatString="0" />
+                                                <TextBox Grid.Column="1"
+                                                         Text="{Binding OnTimeout, Mode=TwoWay}"
+                                                         Watermark="command"
+                                                         Margin="0,0,8,0" />
+                                                <TextBox Grid.Column="2"
+                                                         Text="{Binding OnResume, Mode=TwoWay}"
+                                                         Watermark="optional resume command"
+                                                         Margin="0,0,8,0" />
+                                                <Button Grid.Column="3"
+                                                        Classes="ghost"
+                                                        Content="Remove"
+                                                        Command="{Binding RemoveCommand}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Classes="ghost"
+                                    Content="+ Add listener"
+                                    Command="{Binding Idle.AddListenerCommand}"
+                                    Margin="14,8" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Status + Save -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Classes="status"
+                                   Text="{Binding Idle.StatusMessage}"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1"
+                                Classes="accent"
+                                Content="Save &amp; Restart"
+                                Command="{Binding Idle.SaveCommand}" />
+                    </Grid>
+                </StackPanel>
+
             </StackPanel>
         </ScrollViewer>
 
