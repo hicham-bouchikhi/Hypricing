@@ -30,7 +30,9 @@ public partial class App : Application
             var audioService = new AudioService(cli);
             var audioVm = new AudioViewModel(audioService);
             var powerService = new PowerService(cli);
-            var powerVm = new PowerViewModel(powerService);
+            var idleService = new IdleService(cli);
+            var idleVm = new IdleViewModel(idleService);
+            var powerVm = new PowerViewModel(powerService, idleVm);
             var bluetoothService = new BluetoothService(cli);
             var bluetoothVm = new BluetoothViewModel(bluetoothService);
             var backupVm = new BackupViewModel(service);
@@ -53,6 +55,7 @@ public partial class App : Application
                     inputVm.Refresh();
                     _ = audioVm.InitializeAsync();
                     _ = powerVm.InitializeAsync();
+                    _ = idleVm.InitializeAsync();
                     _ = bluetoothVm.InitializeAsync();
                     backupVm.Refresh();
                 },

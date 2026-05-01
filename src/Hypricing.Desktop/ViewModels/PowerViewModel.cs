@@ -10,13 +10,15 @@ public sealed class PowerViewModel : ViewModelBase
     private string? _activeProfile;
     private BatteryInfo? _battery;
 
-    public PowerViewModel(PowerService service)
+    public PowerViewModel(PowerService service, IdleViewModel idle)
     {
         _service = service;
+        Idle = idle;
         RefreshCommand = new AsyncRelayCommand(() => RefreshAsync());
     }
 
     public ICommand RefreshCommand { get; }
+    public IdleViewModel Idle { get; }
 
     public string[] Profiles
     {

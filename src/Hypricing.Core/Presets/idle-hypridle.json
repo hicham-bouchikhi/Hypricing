@@ -1,0 +1,24 @@
+{
+  "name": "hypridle",
+  "detect": "hypridle",
+  "configPath": "$XDG_CONFIG_HOME/hypr/hypridle.conf",
+  "daemon": {
+    "start":   "systemctl --user start hypridle",
+    "stop":    "systemctl --user stop hypridle",
+    "restart": "systemctl --user restart hypridle",
+    "status":  "systemctl --user is-active hypridle"
+  },
+  "fields": {
+    "general": {
+      "lockCmd":        "lock_cmd",
+      "unlockCmd":      "unlock_cmd",
+      "beforeSleepCmd": "before_sleep_cmd",
+      "afterSleepCmd":  "after_sleep_cmd"
+    },
+    "listener": {
+      "timeout":   "timeout",
+      "onTimeout": "on-timeout",
+      "onResume":  "on-resume"
+    }
+  }
+}
