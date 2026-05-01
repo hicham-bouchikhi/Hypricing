@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Hypricing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Hypricing.Desktop.Views.BluetoothView"
+             x:DataType="vm:BluetoothViewModel">
+
+    <DockPanel>
+
+        <TextBlock DockPanel.Dock="Top"
+                   Classes="page-title"
+                   Text="Bluetooth" />
+
+        <!-- Bottom bar -->
+        <Border DockPanel.Dock="Bottom"
+                Classes="card-elevated"
+                CornerRadius="12,12,0,0"
+                Padding="20,14"
+                Margin="0,16,0,0">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0"
+                           Classes="status"
+                           Text="{Binding StatusMessage}" />
+                <Button Grid.Column="1"
+                        Classes="ghost"
+                        Content="{Binding ScanLabel}"
+                        Command="{Binding ScanCommand}"
+                        IsEnabled="{Binding !IsScanning}"
+                        Margin="0,0,8,0" />
+                <Button Grid.Column="2"
+                        Classes="accent"
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        IsEnabled="{Binding !IsScanning}" />
+            </Grid>
+        </Border>
+
+        <ScrollViewer>
+            <StackPanel Spacing="24">
+
+                <!-- Devices -->
+                <StackPanel>
+                    <TextBlock Classes="section-title" Text="Devices" />
+                    <Border Classes="card">
+                        <ItemsControl ItemsSource="{Binding Devices}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BluetoothDeviceViewModel">
+                                    <Border Classes="card-item" Padding="14,12">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#cdd6f4" />
+                                                <TextBlock Text="{Binding Address}"
+                                                           Classes="muted"
+                                                           FontFamily="JetBrains Mono, Cascadia Code, monospace" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1"
+                                                    Classes="badge"
+                                                    IsVisible="{Binding Connected}"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Connected"
+                                                           FontSize="11"
+                                                           Foreground="#a6e3a1"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Grid.Column="2"
+                                                       IsVisible="{Binding HasBattery}"
+                                                       Text="{Binding BatteryText}"
+                                                       Classes="muted"
+                                                       FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0" />
+                                            <Button Grid.Column="3"
+                                                    Classes="ghost"
+                                                    Content="{Binding ConnectLabel}"
+                                                    Command="{Binding ConnectCommand}"
+                                                    Margin="0,0,8,0" />
+                                            <Button Grid.Column="4"
+                                                    Classes="ghost"
+                                                    Content="Forget"
+                                                    Command="{Binding RemoveCommand}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+
+</UserControl>
