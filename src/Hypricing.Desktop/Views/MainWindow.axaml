@@ -109,6 +109,9 @@
                     <DataTemplate DataType="vm:PowerViewModel">
                         <views:PowerView />
                     </DataTemplate>
+                    <DataTemplate DataType="vm:BluetoothViewModel">
+                        <views:BluetoothView />
+                    </DataTemplate>
                     <DataTemplate DataType="vm:BackupViewModel">
                         <views:BackupView />
                     </DataTemplate>
