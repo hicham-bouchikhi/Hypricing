@@ -1,6 +1,7 @@
 {
   "name": "PulseAudio (pactl)",
   "detect": "pactl",
+  "priority": 5,
   "commands": {
     "listSinks": {
       "run": "pactl -f json list sinks",

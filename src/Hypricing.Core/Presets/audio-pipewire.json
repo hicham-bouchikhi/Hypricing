@@ -1,6 +1,7 @@
 {
   "name": "PipeWire (pactl)",
   "detect": "wpctl",
+  "priority": 10,
   "commands": {
     "listSinks": {
       "run": "pactl -f json list sinks",

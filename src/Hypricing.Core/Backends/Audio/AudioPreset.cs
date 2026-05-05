@@ -14,6 +14,9 @@ public sealed class AudioPreset
     [JsonPropertyName("detect")]
     public string Detect { get; set; } = string.Empty;
 
+    [JsonPropertyName("priority")]
+    public int Priority { get; set; } = 0;
+
     [JsonPropertyName("commands")]
     public AudioPresetCommands Commands { get; set; } = new();
 }

@@ -121,10 +121,24 @@ public class HyprlandService(CliRunner cli)
     public void AddKeybinding(string variant, string @params)
     {
         EnsureLoaded();
-        var target = _configs.FirstOrDefault(c =>
-                         c.Config.Children.OfType<KeywordNode>().Any(k => k.Keyword.StartsWith("bind")))
-                     ?? _configs[0];
-        target.Config.Children.Add(new KeywordNode(variant, @params));
+
+        var hyprDir = Path.GetDirectoryName(_configs[0].FilePath)!;
+        var bindingsPath = Path.GetFullPath(Path.Combine(hyprDir, "bindings.conf"));
+
+        var existing = _configs.FirstOrDefault(c =>
+            string.Equals(c.FilePath, bindingsPath, StringComparison.Ordinal));
+
+        if (existing is not null)
+        {
+            existing.Config.Children.Add(new KeywordNode(variant, @params));
+        }
+        else
+        {
+            var newConfig = HyprlangParser.HyprlangParser.Parse("");
+            newConfig.Children.Add(new KeywordNode(variant, @params));
+            _configs.Add(new LoadedConfig(bindingsPath, newConfig));
+            _configs[0].Config.Children.Add(new SourceNode("bindings.conf"));
+        }
     }
 
     /// <summary>

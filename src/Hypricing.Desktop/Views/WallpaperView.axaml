@@ -1,0 +1,253 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Hypricing.Desktop.ViewModels"
+             xmlns:converters="using:Hypricing.Desktop.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Hypricing.Desktop.Views.WallpaperView"
+             x:DataType="vm:WallpaperViewModel">
+
+    <UserControl.Resources>
+        <converters:PathToImageConverter x:Key="PathToImage" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <!-- Monitor card -->
+        <Style Selector="Border.monitor-card">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.1" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.monitor-card.monitor-selected">
+            <Setter Property="BorderBrush" Value="#89b4fa" />
+        </Style>
+
+        <!-- Image tile -->
+        <Style Selector="Border.img-tile">
+            <Setter Property="BorderBrush" Value="#3b3b52" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.1" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.img-tile.img-selected">
+            <Setter Property="BorderBrush" Value="#89b4fa" />
+        </Style>
+        <Style Selector="Button.img-btn">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.img-btn:pointerover Border.img-tile">
+            <Setter Property="BorderBrush" Value="#585b70" />
+        </Style>
+        <Style Selector="Button.img-btn:pointerover Border.img-tile.img-selected">
+            <Setter Property="BorderBrush" Value="#b4d0fb" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel>
+
+        <TextBlock DockPanel.Dock="Top" Classes="page-title" Text="Wallpaper" />
+
+        <!-- Bottom bar -->
+        <Border DockPanel.Dock="Bottom"
+                Classes="card-elevated"
+                CornerRadius="12,12,0,0"
+                Padding="20,14"
+                Margin="0,16,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="status" Text="{Binding StatusMessage}" />
+                <Button Grid.Column="1" Classes="accent" Content="Refresh" Command="{Binding RefreshCommand}" />
+            </Grid>
+        </Border>
+
+        <!-- Error state -->
+        <TextBlock Text="{Binding Error}"
+                   Foreground="#f38ba8"
+                   FontSize="13"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <!-- Main content -->
+        <DockPanel IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+
+            <!-- Monitor row -->
+            <StackPanel DockPanel.Dock="Top">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,0">
+                    <TextBlock Grid.Column="0" Classes="section-title" Text="Monitors" />
+                    <TextBlock Grid.Column="1"
+                               Classes="muted"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"
+                               Text="{Binding SelectedMonitorCount, StringFormat='{}{0} selected'}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Monitors}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:MonitorWallpaperViewModel">
+                            <Button Command="{Binding SelectCommand}"
+                                    Padding="0"
+                                    Classes="img-btn">
+                                <Border Classes="monitor-card"
+                                        Classes.monitor-selected="{Binding IsSelected}"
+                                        BorderThickness="2"
+                                        CornerRadius="10"
+                                        Width="200"
+                                        Background="#313244">
+                                    <StackPanel>
+                                        <!-- Thumbnail -->
+                                        <Border Height="110" CornerRadius="8,8,0,0" ClipToBounds="True" Background="#11111b">
+                                            <Image Source="{Binding CurrentImagePath, Converter={StaticResource PathToImage}}"
+                                                   Stretch="UniformToFill" />
+                                        </Border>
+                                        <!-- Info row: inner interactive controls stop propagation to outer Button -->
+                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="10,8">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Monitor}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#cdd6f4"
+                                                       FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                                       VerticalAlignment="Center" />
+                                            <!-- Color swatch: opens spectrum-only flyout, no format-selector checkboxes -->
+                                            <Button Grid.Column="1"
+                                                    Padding="4"
+                                                    Classes="img-btn"
+                                                    ToolTip.Tip="Pick solid color">
+                                                <Button.Flyout>
+                                                    <Flyout Placement="Top">
+                                                        <StackPanel Spacing="10" Margin="4">
+                                                            <ColorView Color="{Binding SelectedColor, Mode=TwoWay}"
+                                                                       IsAlphaEnabled="False"
+                                                                       IsAlphaVisible="False"
+                                                                       IsColorComponentsVisible="False"
+                                                                       IsColorPaletteVisible="False"
+                                                                       IsColorModelVisible="False" />
+                                                            <Button Classes="accent"
+                                                                    Content="Apply color"
+                                                                    Command="{Binding SetColorCommand}"
+                                                                    HorizontalAlignment="Stretch" />
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <Border Width="18" Height="18"
+                                                        CornerRadius="4"
+                                                        BorderBrush="#585b70"
+                                                        BorderThickness="1"
+                                                        Background="{Binding SelectedBrush}" />
+                                            </Button>
+                                            <!-- Random -->
+                                            <Button Grid.Column="2"
+                                                    Classes="ghost"
+                                                    Content="⟳"
+                                                    FontSize="14"
+                                                    Padding="6,2"
+                                                    Command="{Binding RandomCommand}"
+                                                    ToolTip.Tip="Random wallpaper" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- Transitions section -->
+            <StackPanel DockPanel.Dock="Bottom"
+                        IsVisible="{Binding SupportsTransitions}"
+                        Margin="0,12,0,0">
+                <TextBlock Classes="section-title" Text="Transitions" />
+                <Border Classes="card" Padding="16,14">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="80,*">
+                            <TextBlock Grid.Column="0" Text="Type" Foreground="#6c7086" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      SelectedItem="{Binding TransitionType, Mode=TwoWay}"
+                                      ItemsSource="{x:Static vm:WallpaperViewModel.TransitionTypes}"
+                                      HorizontalAlignment="Stretch" />
+                        </Grid>
+                        <Grid ColumnDefinitions="80,*,80,*">
+                            <TextBlock Grid.Column="0" Text="Duration (s)" Foreground="#6c7086" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Text="{Binding TransitionDuration, Mode=TwoWay}" Watermark="1.0" Margin="0,0,16,0" />
+                            <TextBlock Grid.Column="2" Text="FPS" Foreground="#6c7086" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="3" Text="{Binding TransitionFps, Mode=TwoWay}" Watermark="30" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Images -->
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                <Grid ColumnDefinitions="*,Auto,Auto" Margin="4,16,0,8">
+                    <TextBlock Grid.Column="0" Classes="section-title" Margin="0" Text="Images" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Classes="muted"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"
+                               Text="{Binding BrowsedFolder}"
+                               IsVisible="{Binding BrowsedFolder, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <Button Grid.Column="2"
+                            Content="Browse folder"
+                            Click="OnBrowseClick"
+                            Background="Transparent"
+                            Foreground="#89b4fa"
+                            BorderBrush="#89b4fa"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="14,6" />
+                </Grid>
+            </StackPanel>
+
+            <TextBlock Classes="muted"
+                       DockPanel.Dock="Top"
+                       Text="Browse a folder to see images here."
+                       IsVisible="{Binding !Images.Count}"
+                       Margin="4,4,0,0" />
+
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding Images}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:WallpaperImageViewModel">
+                            <Button Command="{Binding SelectCommand}"
+                                    Margin="4"
+                                    Classes="img-btn"
+                                    ToolTip.Tip="{Binding FileName}">
+                                <Border Width="160" Height="100"
+                                        CornerRadius="6"
+                                        BorderThickness="2"
+                                        ClipToBounds="True"
+                                        Background="#11111b"
+                                        Classes="img-tile"
+                                        Classes.img-selected="{Binding IsSelected}">
+                                    <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+        </DockPanel>
+
+    </DockPanel>
+
+</UserControl>

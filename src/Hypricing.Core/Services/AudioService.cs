@@ -95,7 +95,7 @@ public sealed class AudioService(CliRunner cli)
         }
 
         // PipeWire first (most common on Hyprland)
-        presets.Sort((a, b) => string.Compare(b.Detect, a.Detect, StringComparison.Ordinal));
+        presets.Sort((a, b) => b.Priority.CompareTo(a.Priority));
         return presets;
     }
 

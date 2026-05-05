@@ -115,6 +115,9 @@
                     <DataTemplate DataType="vm:NetworkViewModel">
                         <views:NetworkView />
                     </DataTemplate>
+                    <DataTemplate DataType="vm:WallpaperViewModel">
+                        <views:WallpaperView />
+                    </DataTemplate>
                     <DataTemplate DataType="vm:BackupViewModel">
                         <views:BackupView />
                     </DataTemplate>

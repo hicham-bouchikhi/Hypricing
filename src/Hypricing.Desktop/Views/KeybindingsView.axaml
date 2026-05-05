@@ -70,33 +70,38 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:BindItemViewModel">
                                 <Border Classes="card-item">
-                                    <Grid ColumnDefinitions="Auto,110,80,*,Auto">
-                                        <Border Grid.Column="0"
-                                                Classes="badge"
-                                                VerticalAlignment="Center"
-                                                Margin="0,0,10,0">
-                                            <TextBlock Text="{Binding Variant}"
-                                                       FontFamily="JetBrains Mono, Cascadia Code, monospace"
-                                                       FontSize="11"
-                                                       Foreground="#f9e2af" />
-                                        </Border>
-                                        <TextBox Grid.Column="1"
-                                                 Text="{Binding Modifiers, Mode=TwoWay}"
-                                                 Watermark="Mods"
-                                                 Margin="0,0,6,0" />
-                                        <TextBox Grid.Column="2"
-                                                 Text="{Binding Key, Mode=TwoWay}"
-                                                 Watermark="Key"
-                                                 Margin="0,0,6,0" />
-                                        <TextBox Grid.Column="3"
-                                                 Text="{Binding Dispatcher, Mode=TwoWay}"
-                                                 Watermark="Dispatcher, Args"
-                                                 Margin="0,0,10,0" />
-                                        <Button Grid.Column="4"
-                                                Classes="danger"
-                                                Content="Remove"
-                                                Command="{Binding RemoveCommand}" />
-                                    </Grid>
+                                    <StackPanel Spacing="6">
+                                        <Grid ColumnDefinitions="Auto,110,80,*,Auto">
+                                            <Border Grid.Column="0"
+                                                    Classes="badge"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding Variant}"
+                                                           FontFamily="JetBrains Mono, Cascadia Code, monospace"
+                                                           FontSize="11"
+                                                           Foreground="#f9e2af" />
+                                            </Border>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Modifiers, Mode=TwoWay}"
+                                                     Watermark="Mods"
+                                                     Margin="0,0,6,0" />
+                                            <TextBox Grid.Column="2"
+                                                     Text="{Binding Key, Mode=TwoWay}"
+                                                     Watermark="Key"
+                                                     Margin="0,0,6,0" />
+                                            <TextBox Grid.Column="3"
+                                                     Text="{Binding Dispatcher, Mode=TwoWay}"
+                                                     Watermark="Dispatcher"
+                                                     Margin="0,0,10,0" />
+                                            <Button Grid.Column="4"
+                                                    Classes="danger"
+                                                    Content="Remove"
+                                                    Command="{Binding RemoveCommand}" />
+                                        </Grid>
+                                        <TextBox Text="{Binding Args, Mode=TwoWay}"
+                                                 Watermark="Arguments"
+                                                 IsVisible="{Binding Dispatcher, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

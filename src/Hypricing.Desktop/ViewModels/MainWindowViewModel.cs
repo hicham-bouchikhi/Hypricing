@@ -16,6 +16,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         PowerViewModel powerPage,
         BluetoothViewModel bluetoothPage,
         NetworkViewModel networkPage,
+        WallpaperViewModel wallpaperPage,
         BackupViewModel backupPage)
     {
         BackupPage = backupPage;
@@ -31,6 +32,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             new PageItem("Power",       powerPage),
             new PageItem("Bluetooth",   bluetoothPage),
             new PageItem("Network",     networkPage),
+            new PageItem("Wallpaper",   wallpaperPage),
         ];
 
         _currentPage = variablesPage;

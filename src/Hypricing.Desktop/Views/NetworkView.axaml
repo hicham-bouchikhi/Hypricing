@@ -24,7 +24,7 @@
                            Classes="status"
                            Text="{Binding StatusMessage}" />
                 <Button Grid.Column="1"
-                        Classes="ghost"
+                        Classes="accent"
                         Content="{Binding ScanLabel}"
                         Command="{Binding ScanCommand}"
                         IsEnabled="{Binding !IsScanning}"
@@ -36,7 +36,7 @@
                         IsEnabled="{Binding !IsScanning}"
                         Margin="0,0,8,0" />
                 <Button Grid.Column="3"
-                        Classes="accent"
+                        Classes="ghost"
                         Content="Refresh"
                         Command="{Binding RefreshCommand}"
                         IsEnabled="{Binding !IsScanning}" />
