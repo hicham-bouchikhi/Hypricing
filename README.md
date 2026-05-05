@@ -53,9 +53,10 @@ sudo cp publish/Hypricing.Desktop /usr/bin/hypricing
 | v0.3 | Input page (keyboard, mouse, cursor, touchpad) |
 | v0.4 | Power page (profiles via `powerprofilesctl`, battery status) |
 | v0.5 | Bluetooth page |
-| v0.6 | In-app warning about Hyprland v0.55 config deprecation |
-| v0.7 | Network page; Bluetooth scan UI |
+| v0.6 | Network page |
+| v0.7 | Bluetooth scan UI |
 | **v0.8** | **Monitor page overhaul** — HDR, refresh rate, scale, transform, VRR, and all `monitor =` options; redesigned drag-and-drop layout |
+| | **Hyprland v0.55 warning** — in-app notice about the upcoming config format change |
 | | **Wallpaper page** — set wallpaper per monitor; auto-detects `awww`, `swww`, or `hyprpaper` |
 | | **Keybinding fixes** — argument field on existing bindings; new bindings written to the correct source file instead of always `hyprland.conf` |
 | | **File segregation on save** — Save button routes each option to the file it belongs to |
