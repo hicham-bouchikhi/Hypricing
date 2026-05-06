@@ -16,7 +16,7 @@ A GUI settings manager for [Hyprland](https://hyprland.org). Provides a graphica
 - **Wallpaper** _(in progress)_ — set wallpaper per monitor; auto-detects `awww`, `swww`, or `hyprpaper`
 - **Backups** — create, restore, and delete zip backups of all config files
 - **Multi-file support** — follows `source =` includes across config files
-- **Native AOT** — 18MB self-contained binary, no runtime needed
+- **Native AOT** — 28MB self-contained binary, no runtime needed
 
 ## Screenshots
 
